@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<VBox xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.healthcare.controller.MainController">
+   <children>
+      <!-- Header Section -->
+      <HBox alignment="CENTER" spacing="10.0" style="-fx-background-color: #2E86AB; -fx-padding: 20;">
+         <children>
+            <Label fx:id="welcomeLabel" text="Welcome to Healthcare Management System" textFill="WHITE">
+               <font>
+                  <Font name="System Bold" size="20.0" />
+               </font>
+            </Label>
+         </children>
+      </HBox>
+      
+      <!-- Main Content Area -->
+      <VBox spacing="20.0" VBox.vgrow="ALWAYS" style="-fx-padding: 30;">
+         <children>
+            <!-- Hello World Section -->
+            <VBox spacing="15.0" style="-fx-background-color: #FFFFFF; -fx-padding: 30; -fx-border-color: #E0E0E0; -fx-border-width: 1; -fx-border-radius: 5;">
+               <children>
+                  <Label text="Hello World Demo" textFill="#2E86AB">
+                     <font>
+                        <Font name="System Bold" size="18.0" />
+                     </font>
+                  </Label>
+                  
+                  <HBox spacing="10.0" alignment="CENTER_LEFT">
+                     <children>
+                        <Label text="Enter your name:" />
+                        <TextField fx:id="nameField" promptText="Your name here..." />
+                        <Button fx:id="helloButton" mnemonicParsing="false" style="-fx-background-color: #2E86AB; -fx-text-fill: white;" text="Say Hello!" />
+                     </children>
+                  </HBox>
+                  
+                  <Label fx:id="greetingLabel" textFill="#2E86AB" visible="false">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                  </Label>
+               </children>
+            </VBox>
+            
+            <!-- System Information -->
+            <VBox spacing="10.0" style="-fx-background-color: #F8F9FA; -fx-padding: 20; -fx-border-color: #E0E0E0; -fx-border-width: 1; -fx-border-radius: 5;">
+               <children>
+                  <Label text="System Information" textFill="#2E86AB">
+                     <font>
+                        <Font name="System Bold" size="16.0" />
+                     </font>
+                  </Label>
+                  
+                  <GridPane hgap="10.0" vgap="5.0">
+                     <columnConstraints>
+                        <ColumnConstraints minWidth="150.0" />
+                        <ColumnConstraints />
+                     </columnConstraints>
+                     <rowConstraints>
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                     </rowConstraints>
+                     <children>
+                        <Label text="Application:" GridPane.columnIndex="0" />
+                        <Label text="Healthcare Management System v1.0" GridPane.columnIndex="1" />
+                        
+                        <Label text="Framework:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                        <Label text="JavaFX 21" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        
+                        <Label text="Status:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                        <Label text="Hello World - Ready for Development" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                     </children>
+                  </GridPane>
+               </children>
+            </VBox>
+         </children>
+      </VBox>
+      
+      <!-- Footer -->
+      <HBox alignment="CENTER" style="-fx-background-color: #2E86AB; -fx-padding: 10;">
+         <children>
+            <Label text="© 2024 Healthcare Management System - Hello World Version" textFill="WHITE">
+               <font>
+                  <Font size="10.0" />
+               </font>
+            </Label>
+         </children>
+      </HBox>
+   </children>
+</VBox>
