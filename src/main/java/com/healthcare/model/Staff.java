@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +35,24 @@ public class Staff {
     @Column(name = "role", nullable = false)
     private Role role;
     
+    @Column(name = "first_name")
+    private String firstName;
+    
+    @Column(name = "last_name")
+    private String lastName;
+    
+    @Column(name = "email")
+    private String email;
+    
+    @Column(name = "phone")
+    private String phone;
+    
+    @Column(name = "is_active")
+    private boolean isActive;
+    
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+    
     // Relationships
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Prescription> prescriptions = new ArrayList<>();
@@ -53,6 +72,20 @@ public class Staff {
         this.username = username;
         this.password = password;
         this.role = role;
+        this.isActive = true;
+        this.createdAt = LocalDateTime.now();
+    }
+    
+    public Staff(String username, String password, Role role, String firstName, String lastName, String email, String phone) {
+        this.username = username;
+        this.password = password;
+        this.role = role;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.phone = phone;
+        this.isActive = true;
+        this.createdAt = LocalDateTime.now();
     }
     
     // Getter methods (manually added since Lombok might not be working)
@@ -113,6 +146,41 @@ public class Staff {
     public boolean canManageStaff() {
         return isManager();
     }
+    
+    public String getFullName() {
+        if (firstName != null && lastName != null) {
+            return firstName + " " + lastName;
+        } else if (firstName != null) {
+            return firstName;
+        } else if (lastName != null) {
+            return lastName;
+        }
+        return username;
+    }
+    
+    public String getDisplayName() {
+        String fullName = getFullName();
+        return fullName.equals(username) ? username : fullName + " (" + username + ")";
+    }
+    
+    // Additional getters and setters for new fields
+    public String getFirstName() { return firstName; }
+    public void setFirstName(String firstName) { this.firstName = firstName; }
+    
+    public String getLastName() { return lastName; }
+    public void setLastName(String lastName) { this.lastName = lastName; }
+    
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+    
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
+    
+    public boolean isActive() { return isActive; }
+    public void setActive(boolean active) { isActive = active; }
+    
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     
     // Role Enum
     public enum Role {

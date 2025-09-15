@@ -2,7 +2,7 @@ package com.healthcare.controller.components;
 
 import com.healthcare.model.Bed;
 import com.healthcare.model.Resident;
-import com.healthcare.services.BedService;
+import com.healthcare.services.BedManagementService;
 import com.healthcare.services.ResidentService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -63,7 +63,7 @@ public class ResidentManagementController implements Initializable {
     
     // Services
     private ResidentService residentService = new ResidentService();
-    private BedService bedService = new BedService();
+    private BedManagementService bedService = new BedManagementService();
     
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -180,6 +180,40 @@ public class ResidentManagementController implements Initializable {
         
         // Setup bed combo box
         bedComboBox.setItems(availableBedsList);
+        
+        // Set custom cell factory for bed combo box to display meaningful information
+        bedComboBox.setCellFactory(listView -> new ListCell<Bed>() {
+            @Override
+            protected void updateItem(Bed bed, boolean empty) {
+                super.updateItem(bed, empty);
+                if (empty || bed == null) {
+                    setText(null);
+                } else {
+                    String displayText = "Room " + bed.getRoomId() + " Bed " + bed.getBedNumber();
+                    if (bed.getBedType() != null) {
+                        displayText += " (" + bed.getBedType() + ")";
+                    }
+                    setText(displayText);
+                }
+            }
+        });
+        
+        // Set button cell for the combo box (what's shown when collapsed)
+        bedComboBox.setButtonCell(new ListCell<Bed>() {
+            @Override
+            protected void updateItem(Bed bed, boolean empty) {
+                super.updateItem(bed, empty);
+                if (empty || bed == null) {
+                    setText("Select a bed...");
+                } else {
+                    String displayText = "Room " + bed.getRoomId() + " Bed " + bed.getBedNumber();
+                    if (bed.getBedType() != null) {
+                        displayText += " (" + bed.getBedType() + ")";
+                    }
+                    setText(displayText);
+                }
+            }
+        });
         
         // Set default admission date to today
         admissionDatePicker.setValue(LocalDate.now());
@@ -341,7 +375,7 @@ public class ResidentManagementController implements Initializable {
                 try {
                     residentService.dischargeResident(resident.getResidentId());
                     if (resident.getCurrentBedId() != null) {
-                        bedService.vacateBed(resident.getCurrentBedId());
+                        bedService.unassignBed(resident.getCurrentBedId());
                     }
                     showSuccess("Resident discharged successfully!");
                     loadResidentsData();
@@ -354,23 +388,81 @@ public class ResidentManagementController implements Initializable {
     
     private void showBedAssignmentDialog(Resident resident) {
         // Create a simple dialog for bed assignment
-        List<Bed> availableBeds = bedService.findVacantBeds();
+        List<Bed> availableBeds = bedService.findAvailableBeds();
         
         if (availableBeds.isEmpty()) {
             showError("No available beds found!");
             return;
         }
         
-        ChoiceDialog<Bed> dialog = new ChoiceDialog<>(availableBeds.get(0), availableBeds);
+        // Create a custom dialog
+        Dialog<Bed> dialog = new Dialog<>();
         dialog.setTitle("Assign Bed");
         dialog.setHeaderText("Select a bed for " + resident.getFullName());
-        dialog.setContentText("Available beds:");
         
+        // Create a combo box with proper formatting
+        ComboBox<Bed> bedComboBox = new ComboBox<>(FXCollections.observableArrayList(availableBeds));
+        bedComboBox.setValue(availableBeds.get(0));
+        
+        // Set the same cell factory as the main bed combo box
+        bedComboBox.setCellFactory(listView -> new ListCell<Bed>() {
+            @Override
+            protected void updateItem(Bed bed, boolean empty) {
+                super.updateItem(bed, empty);
+                if (empty || bed == null) {
+                    setText(null);
+                } else {
+                    String displayText = "Room " + bed.getRoomId() + " Bed " + bed.getBedNumber();
+                    if (bed.getBedType() != null) {
+                        displayText += " (" + bed.getBedType() + ")";
+                    }
+                    setText(displayText);
+                }
+            }
+        });
+        
+        bedComboBox.setButtonCell(new ListCell<Bed>() {
+            @Override
+            protected void updateItem(Bed bed, boolean empty) {
+                super.updateItem(bed, empty);
+                if (empty || bed == null) {
+                    setText("Select a bed...");
+                } else {
+                    String displayText = "Room " + bed.getRoomId() + " Bed " + bed.getBedNumber();
+                    if (bed.getBedType() != null) {
+                        displayText += " (" + bed.getBedType() + ")";
+                    }
+                    setText(displayText);
+                }
+            }
+        });
+        
+        // Add the combo box to the dialog
+        VBox content = new VBox(10);
+        content.getChildren().addAll(
+            new Label("Available beds:"),
+            bedComboBox
+        );
+        dialog.getDialogPane().setContent(content);
+        
+        // Add buttons
+        ButtonType assignButtonType = new ButtonType("Assign", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(assignButtonType, ButtonType.CANCEL);
+        
+        // Set result converter
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == assignButtonType) {
+                return bedComboBox.getValue();
+            }
+            return null;
+        });
+        
+        // Show dialog and handle result
         dialog.showAndWait().ifPresent(selectedBed -> {
             try {
                 // Unassign current bed if any
                 if (resident.getCurrentBedId() != null) {
-                    bedService.vacateBed(resident.getCurrentBedId());
+                    bedService.unassignBed(resident.getCurrentBedId());
                 }
                 
                 // Assign new bed
@@ -407,7 +499,7 @@ public class ResidentManagementController implements Initializable {
     private void loadAvailableBeds() {
         try {
             availableBedsList.clear();
-            List<Bed> vacantBeds = bedService.findVacantBeds();
+            List<Bed> vacantBeds = bedService.findAvailableBeds();
             availableBedsList.addAll(vacantBeds);
             bedComboBox.setItems(availableBedsList);
         } catch (Exception e) {
@@ -425,7 +517,7 @@ public class ResidentManagementController implements Initializable {
             .count();
         
         try {
-            long availableBedsCount = bedService.findVacantBeds().size();
+            long availableBedsCount = bedService.findAvailableBeds().size();
             availableBedsCountLabel.setText(String.valueOf(availableBedsCount));
         } catch (Exception e) {
             availableBedsCountLabel.setText("0");

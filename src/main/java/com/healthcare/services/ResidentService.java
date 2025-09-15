@@ -17,7 +17,7 @@ public class ResidentService implements IResidentService {
 
     @Override
     public Resident save(Resident resident) {
-        String sql = "INSERT INTO Residents (first_name, last_name, gender, birth_date, admission_date, discharge_date, current_bed_id) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Residents (first_name, last_name, gender, birth_date, admission_date, discharge_date, current_bed_id, medical_condition, requires_isolation, emergency_contact, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -29,6 +29,11 @@ public class ResidentService implements IResidentService {
             stmt.setDate(5, Date.valueOf(resident.getAdmissionDate()));
             stmt.setDate(6, resident.getDischargeDate() != null ? Date.valueOf(resident.getDischargeDate()) : null);
             stmt.setLong(7, resident.getCurrentBedId() != null ? resident.getCurrentBedId() : 0);
+            stmt.setString(8, resident.getMedicalCondition());
+            stmt.setBoolean(9, resident.isRequiresIsolation());
+            stmt.setString(10, resident.getEmergencyContact());
+            stmt.setTimestamp(11, Timestamp.valueOf(resident.getCreatedAt()));
+            stmt.setTimestamp(12, Timestamp.valueOf(resident.getUpdatedAt()));
             
             int rowsAffected = stmt.executeUpdate();
             if (rowsAffected > 0) {
@@ -103,7 +108,7 @@ public class ResidentService implements IResidentService {
 
     @Override
     public Resident update(Resident resident) {
-        String sql = "UPDATE Residents SET first_name = ?, last_name = ?, gender = ?, birth_date = ?, admission_date = ?, discharge_date = ?, current_bed_id = ? WHERE resident_id = ?";
+        String sql = "UPDATE Residents SET first_name = ?, last_name = ?, gender = ?, birth_date = ?, admission_date = ?, discharge_date = ?, current_bed_id = ?, medical_condition = ?, requires_isolation = ?, emergency_contact = ?, updated_at = ? WHERE resident_id = ?";
         
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -115,7 +120,11 @@ public class ResidentService implements IResidentService {
             stmt.setDate(5, Date.valueOf(resident.getAdmissionDate()));
             stmt.setDate(6, resident.getDischargeDate() != null ? Date.valueOf(resident.getDischargeDate()) : null);
             stmt.setLong(7, resident.getCurrentBedId() != null ? resident.getCurrentBedId() : 0);
-            stmt.setLong(8, resident.getResidentId());
+            stmt.setString(8, resident.getMedicalCondition());
+            stmt.setBoolean(9, resident.isRequiresIsolation());
+            stmt.setString(10, resident.getEmergencyContact());
+            stmt.setTimestamp(11, Timestamp.valueOf(resident.getUpdatedAt()));
+            stmt.setLong(12, resident.getResidentId());
             
             stmt.executeUpdate();
             return resident;
@@ -244,6 +253,16 @@ public class ResidentService implements IResidentService {
         
         long currentBedId = rs.getLong("current_bed_id");
         resident.setCurrentBedId(currentBedId > 0 ? currentBedId : null);
+        
+        resident.setMedicalCondition(rs.getString("medical_condition"));
+        resident.setRequiresIsolation(rs.getBoolean("requires_isolation"));
+        resident.setEmergencyContact(rs.getString("emergency_contact"));
+        
+        Timestamp createdAt = rs.getTimestamp("created_at");
+        resident.setCreatedAt(createdAt != null ? createdAt.toLocalDateTime() : null);
+        
+        Timestamp updatedAt = rs.getTimestamp("updated_at");
+        resident.setUpdatedAt(updatedAt != null ? updatedAt.toLocalDateTime() : null);
         
         return resident;
     }

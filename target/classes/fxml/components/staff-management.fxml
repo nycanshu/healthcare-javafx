@@ -121,6 +121,7 @@
                               -fx-background-radius: 8; -fx-border-radius: 8;">
                <columns>
                   <TableColumn fx:id="staffIdColumn" text="ID" />
+                  <TableColumn fx:id="nameColumn" text="Name" />
                   <TableColumn fx:id="usernameColumn" text="Username" />
                   <TableColumn fx:id="roleColumn" text="Role" />
                   <TableColumn fx:id="actionsColumn" text="Actions" />
@@ -142,8 +143,11 @@
                <columnConstraints>
                   <ColumnConstraints hgrow="NEVER" minWidth="120" />
                   <ColumnConstraints hgrow="ALWAYS" />
+                  <ColumnConstraints hgrow="NEVER" minWidth="120" />
+                  <ColumnConstraints hgrow="ALWAYS" />
                </columnConstraints>
                
+               <!-- Row 0: Username and First Name -->
                <Label text="Username:" GridPane.columnIndex="0" GridPane.rowIndex="0" 
                       style="-fx-font-weight: bold;" />
                <TextField fx:id="usernameField" promptText="Enter username" 
@@ -152,6 +156,15 @@
                                  -fx-border-color: #DEE2E6; -fx-border-width: 1; 
                                  -fx-padding: 8 12;" />
                
+               <Label text="First Name:" GridPane.columnIndex="2" GridPane.rowIndex="0" 
+                      style="-fx-font-weight: bold;" />
+               <TextField fx:id="firstNameField" promptText="Enter first name" 
+                          GridPane.columnIndex="3" GridPane.rowIndex="0" 
+                          style="-fx-background-radius: 6; -fx-border-radius: 6; 
+                                 -fx-border-color: #DEE2E6; -fx-border-width: 1; 
+                                 -fx-padding: 8 12;" />
+               
+               <!-- Row 1: Password and Last Name -->
                <Label text="Password:" GridPane.columnIndex="0" GridPane.rowIndex="1" 
                       style="-fx-font-weight: bold;" />
                <PasswordField fx:id="passwordField" promptText="Enter password" 
@@ -160,12 +173,39 @@
                                      -fx-border-color: #DEE2E6; -fx-border-width: 1; 
                                      -fx-padding: 8 12;" />
                
+               <Label text="Last Name:" GridPane.columnIndex="2" GridPane.rowIndex="1" 
+                      style="-fx-font-weight: bold;" />
+               <TextField fx:id="lastNameField" promptText="Enter last name" 
+                          GridPane.columnIndex="3" GridPane.rowIndex="1" 
+                          style="-fx-background-radius: 6; -fx-border-radius: 6; 
+                                 -fx-border-color: #DEE2E6; -fx-border-width: 1; 
+                                 -fx-padding: 8 12;" />
+               
+               <!-- Row 2: Role and Email -->
                <Label text="Role:" GridPane.columnIndex="0" GridPane.rowIndex="2" 
                       style="-fx-font-weight: bold;" />
                <ComboBox fx:id="roleComboBox" promptText="Select role" 
                          GridPane.columnIndex="1" GridPane.rowIndex="2" 
                          style="-fx-background-radius: 6; -fx-border-radius: 6; 
                                 -fx-border-color: #DEE2E6; -fx-border-width: 1;" />
+               
+               <Label text="Email:" GridPane.columnIndex="2" GridPane.rowIndex="2" 
+                      style="-fx-font-weight: bold;" />
+               <TextField fx:id="emailField" promptText="Enter email" 
+                          GridPane.columnIndex="3" GridPane.rowIndex="2" 
+                          style="-fx-background-radius: 6; -fx-border-radius: 6; 
+                                 -fx-border-color: #DEE2E6; -fx-border-width: 1; 
+                                 -fx-padding: 8 12;" />
+               
+               <!-- Row 3: Phone (spans two columns) -->
+               <Label text="Phone:" GridPane.columnIndex="0" GridPane.rowIndex="3" 
+                      style="-fx-font-weight: bold;" />
+               <TextField fx:id="phoneField" promptText="Enter phone number" 
+                          GridPane.columnIndex="1" GridPane.rowIndex="3" 
+                          GridPane.columnSpan="3"
+                          style="-fx-background-radius: 6; -fx-border-radius: 6; 
+                                 -fx-border-color: #DEE2E6; -fx-border-width: 1; 
+                                 -fx-padding: 8 12;" />
             </GridPane>
             
             <HBox spacing="15" alignment="CENTER_LEFT">

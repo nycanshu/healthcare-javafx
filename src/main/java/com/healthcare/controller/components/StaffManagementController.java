@@ -25,6 +25,7 @@ public class StaffManagementController implements Initializable {
     // FXML Elements
     @FXML private TableView<Staff> staffTable;
     @FXML private TableColumn<Staff, Long> staffIdColumn;
+    @FXML private TableColumn<Staff, String> nameColumn;
     @FXML private TableColumn<Staff, String> usernameColumn;
     @FXML private TableColumn<Staff, Staff.Role> roleColumn;
     @FXML private TableColumn<Staff, Void> actionsColumn;
@@ -33,6 +34,10 @@ public class StaffManagementController implements Initializable {
     @FXML private TextField usernameField;
     @FXML private PasswordField passwordField;
     @FXML private ComboBox<Staff.Role> roleComboBox;
+    @FXML private TextField firstNameField;
+    @FXML private TextField lastNameField;
+    @FXML private TextField emailField;
+    @FXML private TextField phoneField;
     
     // New UI Elements
     @FXML private Label managersCountLabel;
@@ -60,13 +65,16 @@ public class StaffManagementController implements Initializable {
         
         // Setup table columns with equal width distribution
         staffIdColumn.setCellValueFactory(new PropertyValueFactory<>("staffId"));
-        staffIdColumn.prefWidthProperty().bind(staffTable.widthProperty().multiply(0.15));
+        staffIdColumn.prefWidthProperty().bind(staffTable.widthProperty().multiply(0.10));
+        
+        nameColumn.setCellValueFactory(new PropertyValueFactory<>("fullName"));
+        nameColumn.prefWidthProperty().bind(staffTable.widthProperty().multiply(0.25));
         
         usernameColumn.setCellValueFactory(new PropertyValueFactory<>("username"));
-        usernameColumn.prefWidthProperty().bind(staffTable.widthProperty().multiply(0.35));
+        usernameColumn.prefWidthProperty().bind(staffTable.widthProperty().multiply(0.20));
         
         roleColumn.setCellValueFactory(new PropertyValueFactory<>("role"));
-        roleColumn.prefWidthProperty().bind(staffTable.widthProperty().multiply(0.25));
+        roleColumn.prefWidthProperty().bind(staffTable.widthProperty().multiply(0.20));
         
         // Setup actions column with space-around layout
         actionsColumn.setCellFactory(col -> new TableCell<Staff, Void>() {
@@ -127,7 +135,9 @@ public class StaffManagementController implements Initializable {
                 
                 String lowerCaseFilter = newValue.toLowerCase();
                 return staff.getUsername().toLowerCase().contains(lowerCaseFilter) ||
-                       staff.getRole().name().toLowerCase().contains(lowerCaseFilter);
+                       staff.getRole().name().toLowerCase().contains(lowerCaseFilter) ||
+                       (staff.getFullName() != null && staff.getFullName().toLowerCase().contains(lowerCaseFilter)) ||
+                       (staff.getEmail() != null && staff.getEmail().toLowerCase().contains(lowerCaseFilter));
             });
         });
     }
@@ -153,15 +163,19 @@ public class StaffManagementController implements Initializable {
             String username = usernameField.getText().trim();
             String password = passwordField.getText().trim();
             Staff.Role role = roleComboBox.getValue();
+            String firstName = firstNameField.getText().trim();
+            String lastName = lastNameField.getText().trim();
+            String email = emailField.getText().trim();
+            String phone = phoneField.getText().trim();
             
             if (username.isEmpty() || password.isEmpty() || role == null) {
-                showError("Please fill in all fields");
+                showError("Please fill in required fields (Username, Password, Role)");
                 return;
             }
             
             if (editingStaff == null) {
                 // Add new staff
-                Staff newStaff = new Staff(username, password, role);
+                Staff newStaff = new Staff(username, password, role, firstName, lastName, email, phone);
                 Staff savedStaff = staffService.save(newStaff);
                 staffList.add(savedStaff);
                 showSuccess("Staff member added successfully!");
@@ -170,6 +184,10 @@ public class StaffManagementController implements Initializable {
                 editingStaff.setUsername(username);
                 editingStaff.setPassword(password);
                 editingStaff.setRole(role);
+                editingStaff.setFirstName(firstName.isEmpty() ? null : firstName);
+                editingStaff.setLastName(lastName.isEmpty() ? null : lastName);
+                editingStaff.setEmail(email.isEmpty() ? null : email);
+                editingStaff.setPhone(phone.isEmpty() ? null : phone);
                 try {
                     staffService.update(editingStaff);
                     showSuccess("Staff member updated successfully!");
@@ -201,6 +219,10 @@ public class StaffManagementController implements Initializable {
         usernameField.setText(staff.getUsername());
         passwordField.setText(staff.getPassword());
         roleComboBox.setValue(staff.getRole());
+        firstNameField.setText(staff.getFirstName() != null ? staff.getFirstName() : "");
+        lastNameField.setText(staff.getLastName() != null ? staff.getLastName() : "");
+        emailField.setText(staff.getEmail() != null ? staff.getEmail() : "");
+        phoneField.setText(staff.getPhone() != null ? staff.getPhone() : "");
         
         staffFormContainer.setVisible(true);
         staffFormContainer.setManaged(true);
@@ -271,6 +293,10 @@ public class StaffManagementController implements Initializable {
         usernameField.clear();
         passwordField.clear();
         roleComboBox.setValue(null);
+        firstNameField.clear();
+        lastNameField.clear();
+        emailField.clear();
+        phoneField.clear();
     }
     
     private void showSuccess(String message) {

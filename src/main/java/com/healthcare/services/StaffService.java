@@ -16,7 +16,7 @@ public class StaffService implements IStaffService {
 
     @Override
     public Staff save(Staff staff) {
-        String sql = "INSERT INTO Staff (username, password, role) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO Staff (username, password, role, first_name, last_name, email, phone, is_active, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -24,6 +24,12 @@ public class StaffService implements IStaffService {
             stmt.setString(1, staff.getUsername());
             stmt.setString(2, staff.getPassword());
             stmt.setString(3, staff.getRole().toString());
+            stmt.setString(4, staff.getFirstName());
+            stmt.setString(5, staff.getLastName());
+            stmt.setString(6, staff.getEmail());
+            stmt.setString(7, staff.getPhone());
+            stmt.setBoolean(8, staff.isActive());
+            stmt.setTimestamp(9, Timestamp.valueOf(staff.getCreatedAt()));
             
             int rowsAffected = stmt.executeUpdate();
             if (rowsAffected > 0) {
@@ -51,12 +57,7 @@ public class StaffService implements IStaffService {
             ResultSet rs = stmt.executeQuery();
             
             if (rs.next()) {
-                Staff staff = new Staff();
-                staff.setStaffId(rs.getLong("staff_id"));
-                staff.setUsername(rs.getString("username"));
-                staff.setPassword(rs.getString("password"));
-                staff.setRole(Staff.Role.valueOf(rs.getString("role")));
-                return Optional.of(staff);
+                return Optional.of(mapResultSetToStaff(rs));
             }
             
         } catch (SQLException e) {
@@ -76,12 +77,7 @@ public class StaffService implements IStaffService {
              ResultSet rs = stmt.executeQuery()) {
             
             while (rs.next()) {
-                Staff staff = new Staff();
-                staff.setStaffId(rs.getLong("staff_id"));
-                staff.setUsername(rs.getString("username"));
-                staff.setPassword(rs.getString("password"));
-                staff.setRole(Staff.Role.valueOf(rs.getString("role")));
-                staffList.add(staff);
+                staffList.add(mapResultSetToStaff(rs));
             }
             
         } catch (SQLException e) {
@@ -118,12 +114,7 @@ public class StaffService implements IStaffService {
             ResultSet rs = stmt.executeQuery();
             
             if (rs.next()) {
-                Staff staff = new Staff();
-                staff.setStaffId(rs.getLong("staff_id"));
-                staff.setUsername(rs.getString("username"));
-                staff.setPassword(rs.getString("password"));
-                staff.setRole(Staff.Role.valueOf(rs.getString("role")));
-                return Optional.of(staff);
+                return Optional.of(mapResultSetToStaff(rs));
             }
             
         } catch (SQLException e) {
@@ -136,7 +127,7 @@ public class StaffService implements IStaffService {
 
     @Override
     public Staff update(Staff staff) {
-        String sql = "UPDATE Staff SET username = ?, password = ?, role = ? WHERE staff_id = ?";
+        String sql = "UPDATE Staff SET username = ?, password = ?, role = ?, first_name = ?, last_name = ?, email = ?, phone = ?, is_active = ? WHERE staff_id = ?";
         
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -144,13 +135,36 @@ public class StaffService implements IStaffService {
             stmt.setString(1, staff.getUsername());
             stmt.setString(2, staff.getPassword());
             stmt.setString(3, staff.getRole().toString());
-            stmt.setLong(4, staff.getStaffId());
+            stmt.setString(4, staff.getFirstName());
+            stmt.setString(5, staff.getLastName());
+            stmt.setString(6, staff.getEmail());
+            stmt.setString(7, staff.getPhone());
+            stmt.setBoolean(8, staff.isActive());
+            stmt.setLong(9, staff.getStaffId());
             stmt.executeUpdate();
             return staff;
         } catch (SQLException e) {
             System.err.println("Error updating staff: " + e.getMessage());
             return null;
         }
+    }
+    
+    private Staff mapResultSetToStaff(ResultSet rs) throws SQLException {
+        Staff staff = new Staff();
+        staff.setStaffId(rs.getLong("staff_id"));
+        staff.setUsername(rs.getString("username"));
+        staff.setPassword(rs.getString("password"));
+        staff.setRole(Staff.Role.valueOf(rs.getString("role")));
+        staff.setFirstName(rs.getString("first_name"));
+        staff.setLastName(rs.getString("last_name"));
+        staff.setEmail(rs.getString("email"));
+        staff.setPhone(rs.getString("phone"));
+        staff.setActive(rs.getBoolean("is_active"));
+        
+        Timestamp createdAt = rs.getTimestamp("created_at");
+        staff.setCreatedAt(createdAt != null ? createdAt.toLocalDateTime() : null);
+        
+        return staff;
     }
 }
 
