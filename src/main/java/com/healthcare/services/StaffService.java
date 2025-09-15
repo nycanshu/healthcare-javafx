@@ -132,4 +132,26 @@ public class StaffService implements IStaffService {
         
         return Optional.empty();
     }
+
+
+    @Override
+    public Staff update(Staff staff) {
+        String sql = "UPDATE Staff SET username = ?, password = ?, role = ? WHERE staff_id = ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, staff.getUsername());
+            stmt.setString(2, staff.getPassword());
+            stmt.setString(3, staff.getRole().toString());
+            stmt.setLong(4, staff.getStaffId());
+            stmt.executeUpdate();
+            return staff;
+        } catch (SQLException e) {
+            System.err.println("Error updating staff: " + e.getMessage());
+            return null;
+        }
+    }
 }
+
+        

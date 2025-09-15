@@ -10,7 +10,7 @@ import java.util.List;
 
 /**
  * Controller for the Manager Dashboard
- * Simple implementation without Spring complexity
+ * Simple implementation with component-wise structure
  */
 public class ManagerDashboardController extends BaseDashboardController {
     
@@ -88,7 +88,6 @@ public class ManagerDashboardController extends BaseDashboardController {
     private void showStaffManagement() {
         setActiveButton(staffManagementButton);
         showContent(staffManagementContent);
-        loadStaffManagementData();
     }
     
     @FXML
@@ -130,28 +129,24 @@ public class ManagerDashboardController extends BaseDashboardController {
     @FXML
     private void addNewStaff() {
         showStaffManagement();
-        // TODO: Open add staff dialog
-        showInfo("Add New Staff", "Staff management functionality will be implemented here.");
+        // No info message needed - directly navigate to staff management
     }
     
     @FXML
     private void admitNewResident() {
         showResidentManagement();
-        // TODO: Open admit resident dialog
         showInfo("Admit New Resident", "Resident admission functionality will be implemented here.");
     }
     
     @FXML
     private void scheduleShifts() {
         showShiftScheduling();
-        // TODO: Open shift scheduling dialog
         showInfo("Schedule Shifts", "Shift scheduling functionality will be implemented here.");
     }
     
     @FXML
     private void generateReport() {
         showReportsArchives();
-        // TODO: Open report generation dialog
         showInfo("Generate Report", "Report generation functionality will be implemented here.");
     }
     
@@ -183,10 +178,6 @@ public class ManagerDashboardController extends BaseDashboardController {
         );
     }
     
-    private void loadStaffManagementData() {
-        // TODO: Load staff management data
-    }
-    
     private void loadResidentManagementData() {
         // TODO: Load resident management data
     }
@@ -209,6 +200,14 @@ public class ManagerDashboardController extends BaseDashboardController {
     
     // Helper methods
     private void setActiveButton(Button activeButton) {
+        // Define consistent color scheme
+        final String DEFAULT_COLOR = "#3498DB";      // Blue
+        final String ACTIVE_COLOR = "#2C3E50";       // Dark blue-gray (active state)
+        final String HOVER_COLOR = "#2980B9";        // Darker blue (hover state)
+        
+        // Base button style
+        final String BASE_STYLE = "-fx-text-fill: white; -fx-background-radius: 5; -fx-padding: 12 20 12 20; -fx-font-weight: bold; -fx-cursor: hand;";
+        
         // Reset all buttons
         List<Button> buttons = List.of(
             dashboardButton, staffManagementButton, residentManagementButton,
@@ -217,40 +216,56 @@ public class ManagerDashboardController extends BaseDashboardController {
         
         for (Button button : buttons) {
             if (button == activeButton) {
-                button.setStyle("-fx-background-color: #34495E; -fx-text-fill: white; -fx-background-radius: 3;");
+                // Active button - darker color with subtle shadow
+                button.setStyle("-fx-background-color: " + ACTIVE_COLOR + "; " + BASE_STYLE + 
+                               " -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 3, 0, 0, 1);");
             } else {
-                // Reset to original colors based on button
-                if (button == dashboardButton) {
-                    button.setStyle("-fx-background-color: #2E86AB; -fx-text-fill: white; -fx-background-radius: 3;");
-                } else if (button == staffManagementButton) {
-                    button.setStyle("-fx-background-color: #A23B72; -fx-text-fill: white; -fx-background-radius: 3;");
-                } else if (button == residentManagementButton) {
-                    button.setStyle("-fx-background-color: #F18F01; -fx-text-fill: white; -fx-background-radius: 3;");
-                } else if (button == shiftSchedulingButton) {
-                    button.setStyle("-fx-background-color: #C73E1D; -fx-text-fill: white; -fx-background-radius: 3;");
-                } else if (button == actionLogsButton) {
-                    button.setStyle("-fx-background-color: #2ECC71; -fx-text-fill: white; -fx-background-radius: 3;");
-                } else if (button == reportsArchivesButton) {
-                    button.setStyle("-fx-background-color: #9B59B6; -fx-text-fill: white; -fx-background-radius: 3;");
-                } else if (button == systemSettingsButton) {
-                    button.setStyle("-fx-background-color: #34495E; -fx-text-fill: white; -fx-background-radius: 3;");
-                }
+                // Default button - consistent blue color
+                button.setStyle("-fx-background-color: " + DEFAULT_COLOR + "; " + BASE_STYLE);
+                
+                // Add hover effect
+                button.setOnMouseEntered(e -> {
+                    if (button != activeButton) {
+                        button.setStyle("-fx-background-color: " + HOVER_COLOR + "; " + BASE_STYLE);
+                    }
+                });
+                
+                button.setOnMouseExited(e -> {
+                    if (button != activeButton) {
+                        button.setStyle("-fx-background-color: " + DEFAULT_COLOR + "; " + BASE_STYLE);
+                    }
+                });
             }
         }
     }
     
     private void showContent(VBox content) {
-        // Hide all content areas
+        // Hide all content areas using both visible and managed properties
+        // This prevents layout shifts and components from being pushed down
         dashboardContent.setVisible(false);
+        dashboardContent.setManaged(false);
+        
         staffManagementContent.setVisible(false);
+        staffManagementContent.setManaged(false);
+        
         residentManagementContent.setVisible(false);
+        residentManagementContent.setManaged(false);
+        
         shiftSchedulingContent.setVisible(false);
+        shiftSchedulingContent.setManaged(false);
+        
         actionLogsContent.setVisible(false);
+        actionLogsContent.setManaged(false);
+        
         reportsArchivesContent.setVisible(false);
+        reportsArchivesContent.setManaged(false);
+        
         systemSettingsContent.setVisible(false);
+        systemSettingsContent.setManaged(false);
         
         // Show selected content
         content.setVisible(true);
+        content.setManaged(true);
     }
     
     private void showInfo(String title, String message) {

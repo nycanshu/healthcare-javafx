@@ -37,7 +37,7 @@
    
    <left>
       <!-- Navigation Sidebar -->
-      <VBox spacing="5" style="-fx-background-color: #F8F9FA; -fx-padding: 20;" minWidth="200">
+      <VBox spacing="15" style="-fx-background-color: #F8F9FA; -fx-padding: 20;" minWidth="200">
          <children>
             <Label text="Manager Dashboard" textFill="#2E86AB">
                <font>
@@ -46,46 +46,25 @@
             </Label>
             <Separator />
             
-            <Button fx:id="dashboardButton" text="📊 Dashboard/Home" maxWidth="Infinity" style="-fx-background-color: #2E86AB; -fx-text-fill: white; -fx-background-radius: 3;" onAction="#showDashboard">
-               <font>
-                  <Font size="12.0" />
-               </font>
+            <Button fx:id="dashboardButton" text="📊 Dashboard/Home" maxWidth="Infinity" onAction="#showDashboard">
             </Button>
             
-            <Button fx:id="staffManagementButton" text="👥 Staff Management" maxWidth="Infinity" style="-fx-background-color: #A23B72; -fx-text-fill: white; -fx-background-radius: 3;" onAction="#showStaffManagement">
-               <font>
-                  <Font size="12.0" />
-               </font>
+            <Button fx:id="staffManagementButton" text="👥 Staff Management" maxWidth="Infinity" onAction="#showStaffManagement">
             </Button>
             
-            <Button fx:id="residentManagementButton" text="🏠 Resident Management" maxWidth="Infinity" style="-fx-background-color: #F18F01; -fx-text-fill: white; -fx-background-radius: 3;" onAction="#showResidentManagement">
-               <font>
-                  <Font size="12.0" />
-               </font>
+            <Button fx:id="residentManagementButton" text="🏠 Resident Management" maxWidth="Infinity" onAction="#showResidentManagement">
             </Button>
             
-            <Button fx:id="shiftSchedulingButton" text="📅 Shift Scheduling" maxWidth="Infinity" style="-fx-background-color: #C73E1D; -fx-text-fill: white; -fx-background-radius: 3;" onAction="#showShiftScheduling">
-               <font>
-                  <Font size="12.0" />
-               </font>
+            <Button fx:id="shiftSchedulingButton" text="📅 Shift Scheduling" maxWidth="Infinity" onAction="#showShiftScheduling">
             </Button>
             
-            <Button fx:id="actionLogsButton" text="📋 Action Logs" maxWidth="Infinity" style="-fx-background-color: #2ECC71; -fx-text-fill: white; -fx-background-radius: 3;" onAction="#showActionLogs">
-               <font>
-                  <Font size="12.0" />
-               </font>
+            <Button fx:id="actionLogsButton" text="📋 Action Logs" maxWidth="Infinity" onAction="#showActionLogs">
             </Button>
             
-            <Button fx:id="reportsArchivesButton" text="📈 Reports &amp; Archives" maxWidth="Infinity" style="-fx-background-color: #9B59B6; -fx-text-fill: white; -fx-background-radius: 3;" onAction="#showReportsArchives">
-               <font>
-                  <Font size="12.0" />
-               </font>
+            <Button fx:id="reportsArchivesButton" text="📈 Reports &amp; Archives" maxWidth="Infinity" onAction="#showReportsArchives">
             </Button>
             
-            <Button fx:id="systemSettingsButton" text="⚙️ System Settings" maxWidth="Infinity" style="-fx-background-color: #34495E; -fx-text-fill: white; -fx-background-radius: 3;" onAction="#showSystemSettings">
-               <font>
-                  <Font size="12.0" />
-               </font>
+            <Button fx:id="systemSettingsButton" text="⚙️ System Settings" maxWidth="Infinity" onAction="#showSystemSettings">
             </Button>
          </children>
       </VBox>
@@ -244,29 +223,21 @@
                   </VBox>
                   
                   <!-- Other content areas will be added here -->
-                  <VBox fx:id="staffManagementContent" visible="false" spacing="20">
+                  <VBox fx:id="staffManagementContent" visible="false" managed="false" spacing="20">
                      <children>
-                        <Label text="Staff Management" textFill="#2E86AB">
-                           <font>
-                              <Font name="System Bold" size="20.0" />
-                           </font>
-                        </Label>
-                        <Label text="Staff management functionality will be implemented here." />
+                        <!-- Staff Management Component -->
+                        <fx:include source="components/staff-management.fxml" />
                      </children>
                   </VBox>
                   
-                  <VBox fx:id="residentManagementContent" visible="false" spacing="20">
+                  <VBox fx:id="residentManagementContent" visible="false" managed="false" spacing="20">
                      <children>
-                        <Label text="Resident Management" textFill="#2E86AB">
-                           <font>
-                              <Font name="System Bold" size="20.0" />
-                           </font>
-                        </Label>
-                        <Label text="Resident management functionality will be implemented here." />
+                        <!-- Resident Management Component -->
+                        <fx:include source="components/resident-management.fxml" />
                      </children>
                   </VBox>
                   
-                  <VBox fx:id="shiftSchedulingContent" visible="false" spacing="20">
+                  <VBox fx:id="shiftSchedulingContent" visible="false" managed="false" spacing="20">
                      <children>
                         <Label text="Shift Scheduling" textFill="#2E86AB">
                            <font>
@@ -277,7 +248,7 @@
                      </children>
                   </VBox>
                   
-                  <VBox fx:id="actionLogsContent" visible="false" spacing="20">
+                  <VBox fx:id="actionLogsContent" visible="false" managed="false" spacing="20">
                      <children>
                         <Label text="Action Logs" textFill="#2E86AB">
                            <font>
@@ -288,7 +259,7 @@
                      </children>
                   </VBox>
                   
-                  <VBox fx:id="reportsArchivesContent" visible="false" spacing="20">
+                  <VBox fx:id="reportsArchivesContent" visible="false" managed="false" spacing="20">
                      <children>
                         <Label text="Reports &amp; Archives" textFill="#2E86AB">
                            <font>
@@ -299,7 +270,7 @@
                      </children>
                   </VBox>
                   
-                  <VBox fx:id="systemSettingsContent" visible="false" spacing="20">
+                  <VBox fx:id="systemSettingsContent" visible="false" managed="false" spacing="20">
                      <children>
                         <Label text="System Settings" textFill="#2E86AB">
                            <font>

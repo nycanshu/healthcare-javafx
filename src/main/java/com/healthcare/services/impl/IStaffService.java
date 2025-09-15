@@ -12,10 +12,15 @@ public interface IStaffService {
 
     // Basic CRUD operations
     Staff save(Staff staff);
+
     Optional<Staff> findById(Long id);
+
     List<Staff> findAll();
+
     void deleteById(Long id);
     
+    //update staff 
+    Staff update(Staff staff);
     // Authentication
     Optional<Staff> authenticate(String username, String password);
 }

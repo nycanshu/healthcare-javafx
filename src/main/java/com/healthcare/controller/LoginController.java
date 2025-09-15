@@ -107,6 +107,9 @@ public class LoginController implements Initializable {
             
             primaryStage.setTitle("Healthcare Management System - " + staff.getRole() + " Dashboard");
             primaryStage.setScene(scene);
+            
+            // Center the window on screen
+            primaryStage.centerOnScreen();
             primaryStage.show();
             
         } catch (IOException e) {

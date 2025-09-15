@@ -39,6 +39,10 @@ public class Bed {
     private Resident resident;
     
     // Constructors
+    public Bed() {
+        // Default no-args constructor
+    }
+    
     public Bed(String wardName, String roomNumber, String bedNumber) {
         this.wardName = wardName;
         this.roomNumber = roomNumber;
@@ -72,4 +76,20 @@ public class Bed {
     public String getFullIdentifier() {
         return wardName + "_" + roomNumber + "_" + bedNumber;
     }
+    
+    // Manual getters and setters (since Lombok might not be working consistently)
+    public Long getBedId() { return bedId; }
+    public void setBedId(Long bedId) { this.bedId = bedId; }
+    
+    public String getWardName() { return wardName; }
+    public void setWardName(String wardName) { this.wardName = wardName; }
+    
+    public String getRoomNumber() { return roomNumber; }
+    public void setRoomNumber(String roomNumber) { this.roomNumber = roomNumber; }
+    
+    public String getBedNumber() { return bedNumber; }
+    public void setBedNumber(String bedNumber) { this.bedNumber = bedNumber; }
+    
+    public Long getOccupiedBy() { return occupiedBy; }
+    public void setOccupiedBy(Long occupiedBy) { this.occupiedBy = occupiedBy; }
 }

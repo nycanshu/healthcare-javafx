@@ -53,6 +53,10 @@ public class Resident {
     private List<Prescription> prescriptions = new ArrayList<>();
     
     // Constructors
+    public Resident() {
+        // Default no-args constructor
+    }
+    
     public Resident(String firstName, String lastName, Gender gender, LocalDate admissionDate) {
         this.firstName = firstName;
         this.lastName = lastName;
@@ -83,4 +87,29 @@ public class Resident {
     public enum Gender {
         M, F
     }
+    
+    // Manual getters and setters (since Lombok might not be working consistently)
+    public Long getResidentId() { return residentId; }
+    public void setResidentId(Long residentId) { this.residentId = residentId; }
+    
+    public String getFirstName() { return firstName; }
+    public void setFirstName(String firstName) { this.firstName = firstName; }
+    
+    public String getLastName() { return lastName; }
+    public void setLastName(String lastName) { this.lastName = lastName; }
+    
+    public Gender getGender() { return gender; }
+    public void setGender(Gender gender) { this.gender = gender; }
+    
+    public LocalDate getBirthDate() { return birthDate; }
+    public void setBirthDate(LocalDate birthDate) { this.birthDate = birthDate; }
+    
+    public LocalDate getAdmissionDate() { return admissionDate; }
+    public void setAdmissionDate(LocalDate admissionDate) { this.admissionDate = admissionDate; }
+    
+    public LocalDate getDischargeDate() { return dischargeDate; }
+    public void setDischargeDate(LocalDate dischargeDate) { this.dischargeDate = dischargeDate; }
+    
+    public Long getCurrentBedId() { return currentBedId; }
+    public void setCurrentBedId(Long currentBedId) { this.currentBedId = currentBedId; }
 }
