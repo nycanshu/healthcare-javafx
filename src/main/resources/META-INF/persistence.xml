@@ -9,10 +9,15 @@
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
         
         <!-- Entity Classes -->
-        <class>com.healthcare.model.Patient</class>
-        <class>com.healthcare.model.Doctor</class>
-        <class>com.healthcare.model.Appointment</class>
-        <class>com.healthcare.model.MedicalRecord</class>
+        <class>com.healthcare.model.Resident</class>
+        <class>com.healthcare.model.Staff</class>
+        <class>com.healthcare.model.Bed</class>
+        <class>com.healthcare.model.Prescription</class>
+        <class>com.healthcare.model.Medicine</class>
+        <class>com.healthcare.model.PrescriptionMedicine</class>
+        <class>com.healthcare.model.AdministeredMedication</class>
+        <class>com.healthcare.model.ActionLog</class>
+        <class>com.healthcare.model.Archive</class>
         
         <properties>
             <!-- Database Connection Properties -->
