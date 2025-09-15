@@ -45,9 +45,47 @@ public class Staff {
     private List<ActionLog> actionLogs = new ArrayList<>();
     
     // Constructors
+    public Staff() {
+        // Default no-args constructor
+    }
+    
     public Staff(String username, String password, Role role) {
         this.username = username;
         this.password = password;
+        this.role = role;
+    }
+    
+    // Getter methods (manually added since Lombok might not be working)
+    public String getUsername() {
+        return username;
+    }
+    
+    public String getPassword() {
+        return password;
+    }
+    
+    public Role getRole() {
+        return role;
+    }
+    
+    public Long getStaffId() {
+        return staffId;
+    }
+    
+    // Setter methods
+    public void setStaffId(Long staffId) {
+        this.staffId = staffId;
+    }
+    
+    public void setUsername(String username) {
+        this.username = username;
+    }
+    
+    public void setPassword(String password) {
+        this.password = password;
+    }
+    
+    public void setRole(Role role) {
         this.role = role;
     }
     

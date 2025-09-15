@@ -52,9 +52,6 @@ public class Resident {
     @OneToMany(mappedBy = "resident", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Prescription> prescriptions = new ArrayList<>();
     
-    @OneToMany(mappedBy = "resident", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<ActionLog> actionLogs = new ArrayList<>();
-    
     // Constructors
     public Resident(String firstName, String lastName, Gender gender, LocalDate admissionDate) {
         this.firstName = firstName;
