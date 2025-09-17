@@ -2,7 +2,9 @@ package com.healthcare.controller;
 
 import com.healthcare.model.Staff;
 import com.healthcare.services.StaffService;
+import com.healthcare.controller.components.ActionLogsController;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 
@@ -88,6 +90,7 @@ public class ManagerDashboardController extends BaseDashboardController {
     private void showStaffManagement() {
         setActiveButton(staffManagementButton);
         showContent(staffManagementContent);
+        loadStaffManagementData();
     }
     
     @FXML
@@ -129,25 +132,21 @@ public class ManagerDashboardController extends BaseDashboardController {
     @FXML
     private void addNewStaff() {
         showStaffManagement();
-        // No info message needed - directly navigate to staff management
     }
     
     @FXML
     private void admitNewResident() {
         showResidentManagement();
-        showInfo("Admit New Resident", "Resident admission functionality will be implemented here.");
     }
     
     @FXML
     private void scheduleShifts() {
         showShiftScheduling();
-        showInfo("Schedule Shifts", "Shift scheduling functionality will be implemented here.");
     }
     
     @FXML
     private void generateReport() {
         showReportsArchives();
-        showInfo("Generate Report", "Report generation functionality will be implemented here.");
     }
     
     // Data loading methods
@@ -178,24 +177,118 @@ public class ManagerDashboardController extends BaseDashboardController {
         );
     }
     
+    private void loadStaffManagementData() {
+        try {
+            // Load the Staff Management component
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/components/staff-management.fxml"));
+            VBox staffManagementComponent = loader.load();
+            com.healthcare.controller.components.StaffManagementController controller = loader.getController();
+            controller.setCurrentStaff(currentStaff);
+            
+            // Clear existing content and add the component
+            staffManagementContent.getChildren().clear();
+            staffManagementContent.getChildren().add(staffManagementComponent);
+            
+            System.out.println("Staff management component loaded successfully");
+        } catch (Exception e) {
+            System.err.println("Error loading staff management component: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
     private void loadResidentManagementData() {
-        // TODO: Load resident management data
+        try {
+            // Load the Resident Management component
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/components/resident-management.fxml"));
+            VBox residentManagementComponent = loader.load();
+            com.healthcare.controller.components.ResidentManagementController controller = loader.getController();
+            controller.setCurrentStaff(currentStaff);
+            
+            // Clear existing content and add the component
+            residentManagementContent.getChildren().clear();
+            residentManagementContent.getChildren().add(residentManagementComponent);
+            
+            System.out.println("Resident management component loaded successfully");
+        } catch (Exception e) {
+            System.err.println("Error loading resident management component: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
     
     private void loadShiftSchedulingData() {
-        // TODO: Load shift scheduling data
+        try {
+            // Load the Shift Scheduling component
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/components/shift-scheduling.fxml"));
+            VBox shiftSchedulingComponent = loader.load();
+            com.healthcare.controller.components.ShiftSchedulingController controller = loader.getController();
+            controller.setCurrentStaff(currentStaff);
+            
+            // Clear existing content and add the component
+            shiftSchedulingContent.getChildren().clear();
+            shiftSchedulingContent.getChildren().add(shiftSchedulingComponent);
+            
+            System.out.println("Shift scheduling component loaded successfully");
+        } catch (Exception e) {
+            System.err.println("Error loading shift scheduling component: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
     
     private void loadActionLogsData() {
-        // TODO: Load action logs data
+        try {
+            // Load the Action Logs component
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/components/action-logs.fxml"));
+            VBox actionLogsComponent = loader.load();
+            ActionLogsController controller = loader.getController();
+            controller.setCurrentStaff(currentStaff);
+            
+            // Clear existing content and add the component
+            actionLogsContent.getChildren().clear();
+            actionLogsContent.getChildren().add(actionLogsComponent);
+            
+            System.out.println("Action logs component loaded successfully");
+        } catch (Exception e) {
+            System.err.println("Error loading action logs component: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
     
     private void loadReportsArchivesData() {
-        // TODO: Load reports and archives data
+        try {
+            // Load the Reports and Archives component
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/components/reports-archives.fxml"));
+            VBox reportsArchivesComponent = loader.load();
+            com.healthcare.controller.components.ReportsArchivesController controller = loader.getController();
+            controller.setCurrentStaff(currentStaff);
+            
+            // Clear existing content and add the component
+            reportsArchivesContent.getChildren().clear();
+            reportsArchivesContent.getChildren().add(reportsArchivesComponent);
+            
+            System.out.println("Reports and archives component loaded successfully");
+        } catch (Exception e) {
+            System.err.println("Error loading reports and archives component: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
     
     private void loadSystemSettingsData() {
-        // TODO: Load system settings data
+        try {
+            // Load the System Settings component
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/components/system-settings.fxml"));
+            VBox systemSettingsComponent = loader.load();
+            com.healthcare.controller.components.SystemSettingsController controller = loader.getController();
+            controller.setCurrentStaff(currentStaff);
+            
+            // Clear existing content and add the component
+            systemSettingsContent.getChildren().clear();
+            systemSettingsContent.getChildren().add(systemSettingsComponent);
+            
+            System.out.println("System settings component loaded successfully");
+        } catch (Exception e) {
+            System.err.println("Error loading system settings component: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
     
     // Helper methods
@@ -268,13 +361,6 @@ public class ManagerDashboardController extends BaseDashboardController {
         content.setManaged(true);
     }
     
-    private void showInfo(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
     
     private void showError(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);

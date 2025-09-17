@@ -29,8 +29,21 @@ public class AdministeredMedication {
     @Column(name = "nurse_id", nullable = false)
     private Long nurseId;
     
-    @Column(name = "time", nullable = false)
-    private LocalDateTime time;
+    @Column(name = "administered_time", nullable = false)
+    private LocalDateTime administeredTime;
+    
+    @Column(name = "dosage_given")
+    private String dosageGiven;
+    
+    @Column(name = "notes", columnDefinition = "TEXT")
+    private String notes;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private AdministrationStatus status = AdministrationStatus.Given;
+    
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
     
     // Relationships
     @ManyToOne(fetch = FetchType.LAZY)
@@ -41,15 +54,22 @@ public class AdministeredMedication {
     @JoinColumn(name = "nurse_id", insertable = false, updatable = false)
     private Staff nurse;
     
+    // Enums
+    public enum AdministrationStatus {
+        Given, Missed, Refused
+    }
+    
     // Constructors
-    public AdministeredMedication(Long prescriptionMedicineId, Long nurseId, LocalDateTime time) {
+    public AdministeredMedication(Long prescriptionMedicineId, Long nurseId, LocalDateTime administeredTime) {
         this.prescriptionMedicineId = prescriptionMedicineId;
         this.nurseId = nurseId;
-        this.time = time;
+        this.administeredTime = administeredTime;
+        this.status = AdministrationStatus.Given;
+        this.createdAt = LocalDateTime.now();
     }
     
     // Utility methods
     public String getFullDescription() {
-        return "Medication administered at " + time;
+        return "Medication administered at " + administeredTime;
     }
 }

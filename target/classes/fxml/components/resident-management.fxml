@@ -132,7 +132,6 @@
                        style="-fx-border-color: #dfe6e9; -fx-border-width: 1; 
                               -fx-background-radius: 8; -fx-border-radius: 8;">
                <columns>
-                  <TableColumn fx:id="residentIdColumn" text="ID" />
                   <TableColumn fx:id="nameColumn" text="Name" />
                   <TableColumn fx:id="genderColumn" text="Gender" />
                   <TableColumn fx:id="ageColumn" text="Age" />

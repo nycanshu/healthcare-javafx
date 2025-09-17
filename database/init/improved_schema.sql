@@ -42,7 +42,7 @@ CREATE TABLE Beds (
     UNIQUE KEY unique_bed_per_room (room_id, bed_number)
 );
 
--- Residents Table (Enhanced)
+-- Residents Table (Enhanced) - No foreign key to Beds initially
 CREATE TABLE Residents (
     resident_id INT PRIMARY KEY AUTO_INCREMENT,
     first_name VARCHAR(100) NOT NULL,
@@ -56,8 +56,7 @@ CREATE TABLE Residents (
     requires_isolation BOOLEAN DEFAULT FALSE,
     emergency_contact VARCHAR(200),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (current_bed_id) REFERENCES Beds(bed_id)
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 -- Staff Table (Enhanced with shift management)
@@ -74,19 +73,34 @@ CREATE TABLE Staff (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Shifts Table (Shift templates)
+CREATE TABLE Shifts (
+    shift_id INT PRIMARY KEY AUTO_INCREMENT,
+    shift_name VARCHAR(100) NOT NULL,
+    shift_type ENUM('Morning', 'Afternoon', 'Doctor') NOT NULL,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    ward_id INT,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (ward_id) REFERENCES Wards(ward_id)
+);
+
 -- Shift Schedule Table (For compliance requirements)
 CREATE TABLE Shift_Schedule (
     shift_id INT PRIMARY KEY AUTO_INCREMENT,
     staff_id INT NOT NULL,
     shift_date DATE NOT NULL,
     shift_type ENUM('Morning', 'Afternoon', 'Doctor') NOT NULL,
-    start_time TIME NOT NULL,
-    end_time TIME NOT NULL,
+    start_time VARCHAR(10) NOT NULL,
+    end_time VARCHAR(10) NOT NULL,
     ward_id INT,
-    is_completed BOOLEAN DEFAULT FALSE,
+    status ENUM('Scheduled', 'Completed', 'Cancelled') DEFAULT 'Scheduled',
+    assigned_by INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (staff_id) REFERENCES Staff(staff_id),
-    FOREIGN KEY (ward_id) REFERENCES Wards(ward_id)
+    FOREIGN KEY (ward_id) REFERENCES Wards(ward_id),
+    FOREIGN KEY (assigned_by) REFERENCES Staff(staff_id)
 );
 
 -- Prescriptions Table (Enhanced)
@@ -142,20 +156,15 @@ CREATE TABLE Administered_Medication (
     FOREIGN KEY (nurse_id) REFERENCES Staff(staff_id)
 );
 
--- Actions Log Table (Enhanced for auditing)
+-- Actions Log Table (Simplified for essential auditing)
 CREATE TABLE Actions_Log (
     action_id INT PRIMARY KEY AUTO_INCREMENT,
     staff_id INT,
-    action_type ENUM('Admit', 'Discharge', 'Transfer', 'Prescribe', 'Administer', 'Update') NOT NULL,
+    action_type ENUM('Admit', 'Discharge', 'Transfer', 'Prescribe', 'Administer', 'Update', 'Add_Staff', 'Delete_Staff', 'Assign_Shift', 'Delete_Shift', 'Login', 'Logout', 'Archive') NOT NULL,
     action_description VARCHAR(200) NOT NULL,
-    resident_id INT,
-    bed_id INT,
     action_time DATETIME DEFAULT CURRENT_TIMESTAMP,
     details TEXT,
-    ip_address VARCHAR(45),
-    FOREIGN KEY (staff_id) REFERENCES Staff(staff_id),
-    FOREIGN KEY (resident_id) REFERENCES Residents(resident_id),
-    FOREIGN KEY (bed_id) REFERENCES Beds(bed_id)
+    FOREIGN KEY (staff_id) REFERENCES Staff(staff_id)
 );
 
 -- Archive Table (Enhanced)
@@ -176,6 +185,10 @@ CREATE TABLE Archive (
 -- Add foreign key constraint for Beds.occupied_by after all tables are created
 ALTER TABLE Beds ADD CONSTRAINT fk_bed_occupied_by 
     FOREIGN KEY (occupied_by) REFERENCES Residents(resident_id);
+
+-- Add foreign key constraint for Residents.current_bed_id after all tables are created
+ALTER TABLE Residents ADD CONSTRAINT fk_resident_current_bed 
+    FOREIGN KEY (current_bed_id) REFERENCES Beds(bed_id);
 
 -- =====================================================
 -- SAMPLE DATA INSERTION
@@ -267,8 +280,19 @@ INSERT INTO Beds (room_id, bed_number, bed_code, bed_type, gender_restriction) V
 INSERT INTO Staff (username, password, role, first_name, last_name) VALUES 
 ('manager', 'password', 'Manager', 'John', 'Manager'),
 ('doctor1', 'password', 'Doctor', 'Dr. Sarah', 'Smith'),
+('doctor2', 'password', 'Doctor', 'Dr. Michael', 'Wilson'),
 ('nurse1', 'password', 'Nurse', 'Mary', 'Johnson'),
-('nurse2', 'password', 'Nurse', 'Lisa', 'Brown');
+('nurse2', 'password', 'Nurse', 'Lisa', 'Brown'),
+('nurse3', 'password', 'Nurse', 'Emma', 'Davis');
+
+-- Insert Sample Shifts
+INSERT INTO Shifts (shift_name, shift_type, start_time, end_time, ward_id) VALUES 
+('Morning Shift', 'Morning', '08:00:00', '16:00:00', 1),
+('Afternoon Shift', 'Afternoon', '14:00:00', '22:00:00', 1),
+('Doctor Round', 'Doctor', '09:00:00', '10:00:00', 1),
+('Morning Shift', 'Morning', '08:00:00', '16:00:00', 2),
+('Afternoon Shift', 'Afternoon', '14:00:00', '22:00:00', 2),
+('Doctor Round', 'Doctor', '09:00:00', '10:00:00', 2);
 
 -- Insert Sample Medicines
 INSERT INTO Medicines (name, description, dosage_unit) VALUES 

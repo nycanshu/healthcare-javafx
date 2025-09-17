@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,11 +32,18 @@ public class Prescription {
     @Column(name = "doctor_id", nullable = false)
     private Long doctorId;
     
-    @Column(name = "date", nullable = false)
-    private LocalDate date;
+    @Column(name = "prescription_date", nullable = false)
+    private LocalDate prescriptionDate;
     
     @Column(name = "notes", columnDefinition = "TEXT")
     private String notes;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private PrescriptionStatus status = PrescriptionStatus.Active;
+    
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
     
     // Relationships
     @ManyToOne(fetch = FetchType.LAZY)
@@ -49,12 +57,19 @@ public class Prescription {
     @OneToMany(mappedBy = "prescription", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<PrescriptionMedicine> prescriptionMedicines = new ArrayList<>();
     
+    // Enums
+    public enum PrescriptionStatus {
+        Active, Completed, Cancelled
+    }
+    
     // Constructors
-    public Prescription(Long residentId, Long doctorId, LocalDate date, String notes) {
+    public Prescription(Long residentId, Long doctorId, LocalDate prescriptionDate, String notes) {
         this.residentId = residentId;
         this.doctorId = doctorId;
-        this.date = date;
+        this.prescriptionDate = prescriptionDate;
         this.notes = notes;
+        this.status = PrescriptionStatus.Active;
+        this.createdAt = LocalDateTime.now();
     }
     
     // Utility methods

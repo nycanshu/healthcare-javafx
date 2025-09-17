@@ -266,4 +266,27 @@ public class ResidentService implements IResidentService {
         
         return resident;
     }
+    
+    /**
+     * Find all archived (discharged) residents
+     */
+    public List<Resident> findArchivedResidents() {
+        String sql = "SELECT * FROM Residents WHERE discharge_date IS NOT NULL ORDER BY discharge_date DESC";
+        
+        List<Resident> residents = new ArrayList<>();
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            
+            while (rs.next()) {
+                residents.add(mapResultSetToResident(rs));
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("Error finding archived residents: " + e.getMessage());
+        }
+        
+        return residents;
+    }
 }

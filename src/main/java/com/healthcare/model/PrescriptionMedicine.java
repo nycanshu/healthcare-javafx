@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,11 +32,26 @@ public class PrescriptionMedicine {
     @Column(name = "medicine_id", nullable = false)
     private Long medicineId;
     
-    @Column(name = "dosage")
+    @Column(name = "dosage", nullable = false)
     private String dosage;
     
-    @Column(name = "schedule")
-    private String schedule; // e.g., "8am, 2pm"
+    @Column(name = "frequency", nullable = false)
+    private String frequency; // e.g., "Every 8 hours", "Twice daily"
+    
+    @Column(name = "start_date", nullable = false)
+    private LocalDate startDate;
+    
+    @Column(name = "end_date")
+    private LocalDate endDate;
+    
+    @Column(name = "instructions", columnDefinition = "TEXT")
+    private String instructions;
+    
+    @Column(name = "is_active")
+    private boolean isActive = true;
+    
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
     
     // Relationships
     @ManyToOne(fetch = FetchType.LAZY)
@@ -49,11 +66,14 @@ public class PrescriptionMedicine {
     private List<AdministeredMedication> administeredMedications = new ArrayList<>();
     
     // Constructors
-    public PrescriptionMedicine(Long prescriptionId, Long medicineId, String dosage, String schedule) {
+    public PrescriptionMedicine(Long prescriptionId, Long medicineId, String dosage, String frequency, LocalDate startDate) {
         this.prescriptionId = prescriptionId;
         this.medicineId = medicineId;
         this.dosage = dosage;
-        this.schedule = schedule;
+        this.frequency = frequency;
+        this.startDate = startDate;
+        this.isActive = true;
+        this.createdAt = LocalDateTime.now();
     }
     
     // Utility methods
@@ -78,6 +98,6 @@ public class PrescriptionMedicine {
     }
     
     public String getFullDescription() {
-        return getMedicineName() + " - " + dosage + " - " + schedule;
+        return getMedicineName() + " - " + dosage + " - " + frequency;
     }
 }

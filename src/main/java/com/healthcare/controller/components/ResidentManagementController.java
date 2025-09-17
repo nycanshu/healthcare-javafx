@@ -2,8 +2,11 @@ package com.healthcare.controller.components;
 
 import com.healthcare.model.Bed;
 import com.healthcare.model.Resident;
+import com.healthcare.model.ActionLog;
+import com.healthcare.model.Staff;
 import com.healthcare.services.BedManagementService;
 import com.healthcare.services.ResidentService;
+import com.healthcare.services.ActionLogService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -28,7 +31,6 @@ public class ResidentManagementController implements Initializable {
     
     // FXML Elements - Table
     @FXML private TableView<Resident> residentsTable;
-    @FXML private TableColumn<Resident, Long> residentIdColumn;
     @FXML private TableColumn<Resident, String> nameColumn;
     @FXML private TableColumn<Resident, Resident.Gender> genderColumn;
     @FXML private TableColumn<Resident, Integer> ageColumn;
@@ -65,6 +67,10 @@ public class ResidentManagementController implements Initializable {
     // Services
     private ResidentService residentService = new ResidentService();
     private BedManagementService bedService = new BedManagementService();
+    private ActionLogService actionLogService = new ActionLogService();
+    
+    // Current staff for action logging
+    private Staff currentStaff;
     
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -74,21 +80,25 @@ public class ResidentManagementController implements Initializable {
         loadResidentsData();
     }
     
+    /**
+     * Set the current logged-in staff member for action logging
+     */
+    public void setCurrentStaff(Staff staff) {
+        this.currentStaff = staff;
+    }
+    
     private void setupTable() {
         System.out.println("Setting up resident management component...");
         
         // Setup table columns with equal width distribution
-        residentIdColumn.setCellValueFactory(new PropertyValueFactory<>("residentId"));
-        residentIdColumn.prefWidthProperty().bind(residentsTable.widthProperty().multiply(0.08));
-        
         nameColumn.setCellValueFactory(cellData -> {
             Resident resident = cellData.getValue();
             return new javafx.beans.property.SimpleStringProperty(resident.getFullName());
         });
-        nameColumn.prefWidthProperty().bind(residentsTable.widthProperty().multiply(0.18));
+        nameColumn.prefWidthProperty().bind(residentsTable.widthProperty().multiply(0.22));
         
         genderColumn.setCellValueFactory(new PropertyValueFactory<>("gender"));
-        genderColumn.prefWidthProperty().bind(residentsTable.widthProperty().multiply(0.08));
+        genderColumn.prefWidthProperty().bind(residentsTable.widthProperty().multiply(0.10));
         
         ageColumn.setCellValueFactory(cellData -> {
             Resident resident = cellData.getValue();
@@ -97,7 +107,7 @@ public class ResidentManagementController implements Initializable {
         ageColumn.prefWidthProperty().bind(residentsTable.widthProperty().multiply(0.08));
         
         admissionDateColumn.setCellValueFactory(new PropertyValueFactory<>("admissionDate"));
-        admissionDateColumn.prefWidthProperty().bind(residentsTable.widthProperty().multiply(0.12));
+        admissionDateColumn.prefWidthProperty().bind(residentsTable.widthProperty().multiply(0.15));
         
         bedColumn.setCellValueFactory(cellData -> {
             Resident resident = cellData.getValue();
@@ -321,6 +331,15 @@ public class ResidentManagementController implements Initializable {
                     bedService.assignResidentToBed(selectedBed.getBedId(), savedResident.getResidentId());
                 }
                 
+                // Log the action
+                ActionLog actionLog = new ActionLog(
+                    currentStaff != null ? currentStaff.getStaffId() : null,
+                    ActionLog.ActionType.Admit,
+                    "Admitted resident: " + newResident.getFullName(),
+                    "Bed: " + (selectedBed != null ? selectedBed.getBedCode() : "Not assigned")
+                );
+                actionLogService.save(actionLog);
+                
                 showSuccess("Resident admitted successfully!");
             } else {
                 // Update existing resident
@@ -335,6 +354,16 @@ public class ResidentManagementController implements Initializable {
                 }
                 
                 residentService.update(editingResident);
+                
+                // Log the action
+                ActionLog actionLog = new ActionLog(
+                    currentStaff != null ? currentStaff.getStaffId() : null,
+                    ActionLog.ActionType.Update,
+                    "Updated resident: " + editingResident.getFullName(),
+                    "Resident details modified"
+                );
+                actionLogService.save(actionLog);
+                
                 showSuccess("Resident updated successfully!");
             }
             
@@ -395,6 +424,16 @@ public class ResidentManagementController implements Initializable {
                     if (resident.getCurrentBedId() != null) {
                         bedService.unassignBed(resident.getCurrentBedId());
                     }
+                    
+                    // Log the action
+                    ActionLog actionLog = new ActionLog(
+                        currentStaff != null ? currentStaff.getStaffId() : null,
+                        ActionLog.ActionType.Discharge,
+                        "Discharged resident: " + resident.getFullName(),
+                        "Resident discharged from facility"
+                    );
+                    actionLogService.save(actionLog);
+                    
                     showSuccess("Resident discharged successfully!");
                     loadResidentsData();
                 } catch (Exception e) {

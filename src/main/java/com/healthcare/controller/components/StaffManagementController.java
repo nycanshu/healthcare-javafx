@@ -1,7 +1,9 @@
 package com.healthcare.controller.components;
 
 import com.healthcare.model.Staff;
+import com.healthcare.model.ActionLog;
 import com.healthcare.services.StaffService;
+import com.healthcare.services.ActionLogService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -24,7 +26,6 @@ public class StaffManagementController implements Initializable {
     
     // FXML Elements
     @FXML private TableView<Staff> staffTable;
-    @FXML private TableColumn<Staff, Long> staffIdColumn;
     @FXML private TableColumn<Staff, String> nameColumn;
     @FXML private TableColumn<Staff, String> usernameColumn;
     @FXML private TableColumn<Staff, Staff.Role> roleColumn;
@@ -49,9 +50,11 @@ public class StaffManagementController implements Initializable {
     private ObservableList<Staff> staffList = FXCollections.observableArrayList();
     private FilteredList<Staff> filteredStaffList;
     private Staff editingStaff = null;
+    private Staff currentStaff; // Current logged-in staff member
     
-    // Service
+    // Services
     private StaffService staffService = new StaffService();
+    private ActionLogService actionLogService = new ActionLogService();
     
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -60,15 +63,19 @@ public class StaffManagementController implements Initializable {
         loadStaffData();
     }
     
+    /**
+     * Set the current logged-in staff member for action logging
+     */
+    public void setCurrentStaff(Staff staff) {
+        this.currentStaff = staff;
+    }
+    
     private void setupTable() {
         System.out.println("Setting up staff management component...");
         
         // Setup table columns with equal width distribution
-        staffIdColumn.setCellValueFactory(new PropertyValueFactory<>("staffId"));
-        staffIdColumn.prefWidthProperty().bind(staffTable.widthProperty().multiply(0.10));
-        
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("fullName"));
-        nameColumn.prefWidthProperty().bind(staffTable.widthProperty().multiply(0.25));
+        nameColumn.prefWidthProperty().bind(staffTable.widthProperty().multiply(0.30));
         
         usernameColumn.setCellValueFactory(new PropertyValueFactory<>("username"));
         usernameColumn.prefWidthProperty().bind(staffTable.widthProperty().multiply(0.20));
@@ -178,6 +185,16 @@ public class StaffManagementController implements Initializable {
                 Staff newStaff = new Staff(username, password, role, firstName, lastName, email, phone);
                 Staff savedStaff = staffService.save(newStaff);
                 staffList.add(savedStaff);
+                
+                // Log the action
+                ActionLog actionLog = new ActionLog(
+                    currentStaff != null ? currentStaff.getStaffId() : null,
+                    ActionLog.ActionType.Add_Staff,
+                    "Added new staff: " + newStaff.getFullName(),
+                    "Role: " + role.name() + ", Username: " + username
+                );
+                actionLogService.save(actionLog);
+                
                 showSuccess("Staff member added successfully!");
             } else {
                 // Update existing staff
@@ -190,6 +207,16 @@ public class StaffManagementController implements Initializable {
                 editingStaff.setPhone(phone.isEmpty() ? null : phone);
                 try {
                     staffService.update(editingStaff);
+                    
+                    // Log the action
+                    ActionLog actionLog = new ActionLog(
+                        currentStaff != null ? currentStaff.getStaffId() : null,
+                        ActionLog.ActionType.Update,
+                        "Updated staff: " + editingStaff.getFullName(),
+                        "Staff details modified"
+                    );
+                    actionLogService.save(actionLog);
+                    
                     showSuccess("Staff member updated successfully!");
                 } catch (Exception e) {
                     showError("Failed to update staff: " + e.getMessage());
@@ -239,6 +266,16 @@ public class StaffManagementController implements Initializable {
                 try {
                     staffService.deleteById(staff.getStaffId());
                     staffList.remove(staff);
+                    
+                    // Log the action
+                    ActionLog actionLog = new ActionLog(
+                        currentStaff != null ? currentStaff.getStaffId() : null,
+                        ActionLog.ActionType.Delete_Staff,
+                        "Deleted staff: " + staff.getFullName(),
+                        "Username: " + staff.getUsername() + ", Role: " + staff.getRole().name()
+                    );
+                    actionLogService.save(actionLog);
+                    
                     showSuccess("Staff member deleted successfully!");
                 } catch (Exception e) {
                     showError("Failed to delete staff: " + e.getMessage());
@@ -254,13 +291,19 @@ public class StaffManagementController implements Initializable {
             List<Staff> allStaff = staffService.findAll();
             System.out.println("Found " + allStaff.size() + " staff members");
             
+            // Filter out the current logged-in staff member
+            List<Staff> filteredStaff = allStaff.stream()
+                .filter(staff -> currentStaff == null || !staff.getStaffId().equals(currentStaff.getStaffId()))
+                .collect(java.util.stream.Collectors.toList());
+            
             for (Staff staff : allStaff) {
                 System.out.println("Staff: ID=" + staff.getStaffId() + 
                                  ", Username=" + staff.getUsername() + 
                                  ", Role=" + staff.getRole());
             }
+            System.out.println("Filtered staff count: " + filteredStaff.size() + " (excluding current user)");
             
-            staffList.addAll(allStaff);
+            staffList.addAll(filteredStaff);
             staffTable.refresh();
             updateStaffCounts();
             System.out.println("Staff table updated with " + staffList.size() + " items");

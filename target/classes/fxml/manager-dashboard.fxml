@@ -239,12 +239,8 @@
                   
                   <VBox fx:id="shiftSchedulingContent" visible="false" managed="false" spacing="20">
                      <children>
-                        <Label text="Shift Scheduling" textFill="#2E86AB">
-                           <font>
-                              <Font name="System Bold" size="20.0" />
-                           </font>
-                        </Label>
-                        <Label text="Shift scheduling functionality will be implemented here." />
+                        <!-- Shift Scheduling Component -->
+                        <fx:include source="components/shift-scheduling.fxml" />
                      </children>
                   </VBox>
                   
