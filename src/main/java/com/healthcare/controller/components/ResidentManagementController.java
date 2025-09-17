@@ -17,6 +17,7 @@ import javafx.scene.layout.VBox;
 import java.net.URL;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 /**
@@ -100,8 +101,19 @@ public class ResidentManagementController implements Initializable {
         
         bedColumn.setCellValueFactory(cellData -> {
             Resident resident = cellData.getValue();
-            String bedInfo = resident.getCurrentBedId() != null ? "Bed " + resident.getCurrentBedId() : "No Bed";
-            return new javafx.beans.property.SimpleStringProperty(bedInfo);
+            if (resident.getCurrentBedId() != null) {
+                try {
+                    // Get bed information to display bed code
+                    Optional<Bed> bed = bedService.findById(resident.getCurrentBedId());
+                    if (bed.isPresent()) {
+                        return new javafx.beans.property.SimpleStringProperty(bed.get().getBedCode());
+                    }
+                } catch (Exception e) {
+                    System.err.println("Error getting bed info: " + e.getMessage());
+                }
+                return new javafx.beans.property.SimpleStringProperty("Bed " + resident.getCurrentBedId());
+            }
+            return new javafx.beans.property.SimpleStringProperty("No Bed");
         });
         bedColumn.prefWidthProperty().bind(residentsTable.widthProperty().multiply(0.12));
         
@@ -189,7 +201,7 @@ public class ResidentManagementController implements Initializable {
                 if (empty || bed == null) {
                     setText(null);
                 } else {
-                    String displayText = "Room " + bed.getRoomId() + " Bed " + bed.getBedNumber();
+                    String displayText = bed.getBedCode() != null ? bed.getBedCode() : "Room " + bed.getRoomId() + " Bed " + bed.getBedNumber();
                     if (bed.getBedType() != null) {
                         displayText += " (" + bed.getBedType() + ")";
                     }
@@ -206,7 +218,7 @@ public class ResidentManagementController implements Initializable {
                 if (empty || bed == null) {
                     setText("Select a bed...");
                 } else {
-                    String displayText = "Room " + bed.getRoomId() + " Bed " + bed.getBedNumber();
+                    String displayText = bed.getBedCode() != null ? bed.getBedCode() : "Room " + bed.getRoomId() + " Bed " + bed.getBedNumber();
                     if (bed.getBedType() != null) {
                         displayText += " (" + bed.getBedType() + ")";
                     }
@@ -352,14 +364,20 @@ public class ResidentManagementController implements Initializable {
         birthDatePicker.setValue(resident.getBirthDate());
         admissionDatePicker.setValue(resident.getAdmissionDate());
         
-        // Set current bed if assigned
+        // Load available beds first
+        loadAvailableBeds();
+        
+        // Set current bed if assigned - do this after loading available beds
         if (resident.getCurrentBedId() != null) {
             bedService.findById(resident.getCurrentBedId()).ifPresent(bed -> {
+                // Add the current bed to the available beds list if it's not already there
+                if (!availableBedsList.contains(bed)) {
+                    availableBedsList.add(bed);
+                }
                 bedComboBox.setValue(bed);
             });
         }
         
-        loadAvailableBeds();
         residentFormContainer.setVisible(true);
         residentFormContainer.setManaged(true);
     }
@@ -412,7 +430,7 @@ public class ResidentManagementController implements Initializable {
                 if (empty || bed == null) {
                     setText(null);
                 } else {
-                    String displayText = "Room " + bed.getRoomId() + " Bed " + bed.getBedNumber();
+                    String displayText = bed.getBedCode() != null ? bed.getBedCode() : "Room " + bed.getRoomId() + " Bed " + bed.getBedNumber();
                     if (bed.getBedType() != null) {
                         displayText += " (" + bed.getBedType() + ")";
                     }
@@ -428,7 +446,7 @@ public class ResidentManagementController implements Initializable {
                 if (empty || bed == null) {
                     setText("Select a bed...");
                 } else {
-                    String displayText = "Room " + bed.getRoomId() + " Bed " + bed.getBedNumber();
+                    String displayText = bed.getBedCode() != null ? bed.getBedCode() : "Room " + bed.getRoomId() + " Bed " + bed.getBedNumber();
                     if (bed.getBedType() != null) {
                         displayText += " (" + bed.getBedType() + ")";
                     }
@@ -501,6 +519,16 @@ public class ResidentManagementController implements Initializable {
             availableBedsList.clear();
             List<Bed> vacantBeds = bedService.findAvailableBeds();
             availableBedsList.addAll(vacantBeds);
+            
+            // If editing a resident with an assigned bed, include that bed in the list
+            if (editingResident != null && editingResident.getCurrentBedId() != null) {
+                bedService.findById(editingResident.getCurrentBedId()).ifPresent(bed -> {
+                    if (!availableBedsList.contains(bed)) {
+                        availableBedsList.add(bed);
+                    }
+                });
+            }
+            
             bedComboBox.setItems(availableBedsList);
         } catch (Exception e) {
             System.err.println("Error loading available beds: " + e.getMessage());

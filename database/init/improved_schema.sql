@@ -30,6 +30,7 @@ CREATE TABLE Beds (
     bed_id INT PRIMARY KEY AUTO_INCREMENT,
     room_id INT NOT NULL,
     bed_number VARCHAR(20) NOT NULL,
+    bed_code VARCHAR(20) NOT NULL UNIQUE, -- Format: W{ward_number}R{room_number}B{bed_number}
     bed_type ENUM('Standard', 'Electric', 'Special') DEFAULT 'Standard',
     is_occupied BOOLEAN DEFAULT FALSE,
     occupied_by INT NULL,
@@ -38,7 +39,6 @@ CREATE TABLE Beds (
     last_cleaned TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (room_id) REFERENCES Rooms(room_id),
-    FOREIGN KEY (occupied_by) REFERENCES Residents(resident_id),
     UNIQUE KEY unique_bed_per_room (room_id, bed_number)
 );
 
@@ -170,6 +170,14 @@ CREATE TABLE Archive (
 );
 
 -- =====================================================
+-- ADDITIONAL FOREIGN KEY CONSTRAINTS
+-- =====================================================
+
+-- Add foreign key constraint for Beds.occupied_by after all tables are created
+ALTER TABLE Beds ADD CONSTRAINT fk_bed_occupied_by 
+    FOREIGN KEY (occupied_by) REFERENCES Residents(resident_id);
+
+-- =====================================================
 -- SAMPLE DATA INSERTION
 -- =====================================================
 
@@ -197,57 +205,63 @@ INSERT INTO Rooms (ward_id, room_number, room_type, max_capacity, gender_prefere
 (2, '206', 'Special', 2, 'Mixed');
 
 -- Insert Beds (1-4 beds per room as specified)
-INSERT INTO Beds (room_id, bed_number, bed_type, gender_restriction) VALUES 
--- Room 101 (4 beds)
-(1, 'A', 'Standard', 'None'),
-(1, 'B', 'Standard', 'None'),
-(1, 'C', 'Standard', 'None'),
-(1, 'D', 'Standard', 'None'),
+INSERT INTO Beds (room_id, bed_number, bed_code, bed_type, gender_restriction) VALUES 
+-- Room 101 (4 beds) - Ward 1
+(1, 'A', 'W1R101B1', 'Standard', 'None'),
+(1, 'B', 'W1R101B2', 'Standard', 'None'),
+(1, 'C', 'W1R101B3', 'Standard', 'None'),
+(1, 'D', 'W1R101B4', 'Standard', 'None'),
 
--- Room 102 (3 beds)
-(2, 'A', 'Standard', 'None'),
-(2, 'B', 'Standard', 'None'),
-(2, 'C', 'Standard', 'None'),
+-- Room 102 (3 beds) - Ward 1
+(2, 'A', 'W1R102B1', 'Standard', 'None'),
+(2, 'B', 'W1R102B2', 'Standard', 'None'),
+(2, 'C', 'W1R102B3', 'Standard', 'None'),
 
--- Room 103 (1 bed - Isolation)
-(3, 'A', 'Special', 'None'),
+-- Room 103 (1 bed - Isolation) - Ward 1
+(3, 'A', 'W1R103B1', 'Special', 'None'),
 
--- Room 104 (4 beds)
-(4, 'A', 'Standard', 'None'),
-(4, 'B', 'Standard', 'None'),
-(4, 'C', 'Standard', 'None'),
-(4, 'D', 'Standard', 'None'),
+-- Room 104 (4 beds) - Ward 1
+(4, 'A', 'W1R104B1', 'Standard', 'None'),
+(4, 'B', 'W1R104B2', 'Standard', 'None'),
+(4, 'C', 'W1R104B3', 'Standard', 'None'),
+(4, 'D', 'W1R104B4', 'Standard', 'None'),
 
--- Room 105 (2 beds)
-(5, 'A', 'Standard', 'None'),
-(5, 'B', 'Standard', 'None'),
+-- Room 105 (2 beds) - Ward 1
+(5, 'A', 'W1R105B1', 'Standard', 'None'),
+(5, 'B', 'W1R105B2', 'Standard', 'None'),
 
--- Room 106 (2 beds - Special)
-(6, 'A', 'Electric', 'None'),
-(6, 'B', 'Electric', 'None'),
+-- Room 106 (2 beds - Special) - Ward 1
+(6, 'A', 'W1R106B1', 'Electric', 'None'),
+(6, 'B', 'W1R106B2', 'Electric', 'None'),
 
 -- Ward 2 beds (similar pattern)
-(7, 'A', 'Standard', 'None'),
-(7, 'B', 'Standard', 'None'),
-(7, 'C', 'Standard', 'None'),
-(7, 'D', 'Standard', 'None'),
+-- Room 201 (4 beds) - Ward 2
+(7, 'A', 'W2R201B1', 'Standard', 'None'),
+(7, 'B', 'W2R201B2', 'Standard', 'None'),
+(7, 'C', 'W2R201B3', 'Standard', 'None'),
+(7, 'D', 'W2R201B4', 'Standard', 'None'),
 
-(8, 'A', 'Standard', 'None'),
-(8, 'B', 'Standard', 'None'),
-(8, 'C', 'Standard', 'None'),
+-- Room 202 (3 beds) - Ward 2
+(8, 'A', 'W2R202B1', 'Standard', 'None'),
+(8, 'B', 'W2R202B2', 'Standard', 'None'),
+(8, 'C', 'W2R202B3', 'Standard', 'None'),
 
-(9, 'A', 'Special', 'None'),
+-- Room 203 (1 bed - Isolation) - Ward 2
+(9, 'A', 'W2R203B1', 'Special', 'None'),
 
-(10, 'A', 'Standard', 'None'),
-(10, 'B', 'Standard', 'None'),
-(10, 'C', 'Standard', 'None'),
-(10, 'D', 'Standard', 'None'),
+-- Room 204 (4 beds) - Ward 2
+(10, 'A', 'W2R204B1', 'Standard', 'None'),
+(10, 'B', 'W2R204B2', 'Standard', 'None'),
+(10, 'C', 'W2R204B3', 'Standard', 'None'),
+(10, 'D', 'W2R204B4', 'Standard', 'None'),
 
-(11, 'A', 'Standard', 'None'),
-(11, 'B', 'Standard', 'None'),
+-- Room 205 (2 beds) - Ward 2
+(11, 'A', 'W2R205B1', 'Standard', 'None'),
+(11, 'B', 'W2R205B2', 'Standard', 'None'),
 
-(12, 'A', 'Electric', 'None'),
-(12, 'B', 'Electric', 'None');
+-- Room 206 (2 beds - Special) - Ward 2
+(12, 'A', 'W2R206B1', 'Electric', 'None'),
+(12, 'B', 'W2R206B2', 'Electric', 'None');
 
 -- Insert Sample Staff
 INSERT INTO Staff (username, password, role, first_name, last_name) VALUES 

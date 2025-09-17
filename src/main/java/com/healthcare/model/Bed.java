@@ -29,6 +29,9 @@ public class Bed {
     @Column(name = "bed_number", nullable = false)
     private String bedNumber;
     
+    @Column(name = "bed_code", nullable = false, unique = true)
+    private String bedCode;
+    
     @Enumerated(EnumType.STRING)
     @Column(name = "bed_type")
     private BedType bedType;
@@ -75,6 +78,19 @@ public class Bed {
         this.genderRestriction = GenderRestriction.None;
         this.isolationRequired = false;
         this.createdAt = LocalDateTime.now();
+        // bedCode will be set by the service layer based on ward and room info
+    }
+    
+    public Bed(Long roomId, String bedNumber, String bedCode, BedType bedType) {
+        this.roomId = roomId;
+        this.bedNumber = bedNumber;
+        this.bedCode = bedCode;
+        this.bedType = bedType;
+        this.occupied = false;
+        this.occupiedBy = null;
+        this.genderRestriction = GenderRestriction.None;
+        this.isolationRequired = false;
+        this.createdAt = LocalDateTime.now();
     }
     
     // Utility methods
@@ -99,17 +115,11 @@ public class Bed {
     }
     
     public String getLocation() {
-        if (room != null) {
-            return "Room " + room.getRoomNumber() + " - Bed " + bedNumber;
-        }
-        return "Bed " + bedNumber;
+        return bedCode != null ? bedCode : "Bed " + bedNumber;
     }
     
     public String getFullIdentifier() {
-        if (room != null) {
-            return "Room_" + room.getRoomNumber() + "_Bed_" + bedNumber;
-        }
-        return "Bed_" + bedNumber;
+        return bedCode != null ? bedCode : "Bed_" + bedNumber;
     }
     
     public String getRoomNumber() {
@@ -122,7 +132,7 @@ public class Bed {
     }
     
     public String getDisplayName() {
-        return "Bed " + bedNumber + " (" + bedType + ")";
+        return bedCode != null ? bedCode + " (" + bedType + ")" : "Bed " + bedNumber + " (" + bedType + ")";
     }
     
     public boolean isSuitableForGender(Resident.Gender gender) {
@@ -153,6 +163,9 @@ public class Bed {
     public String getBedNumber() { return bedNumber; }
     public void setBedNumber(String bedNumber) { this.bedNumber = bedNumber; }
     
+    public String getBedCode() { return bedCode; }
+    public void setBedCode(String bedCode) { this.bedCode = bedCode; }
+    
     public BedType getBedType() { return bedType; }
     public void setBedType(BedType bedType) { this.bedType = bedType; }
     
@@ -175,4 +188,23 @@ public class Bed {
     
     public Room getRoom() { return room; }
     public void setRoom(Room room) { this.room = room; }
+    
+    // Override equals and hashCode for proper comparison
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Bed bed = (Bed) obj;
+        return bedId != null ? bedId.equals(bed.bedId) : bed.bedId == null;
+    }
+    
+    @Override
+    public int hashCode() {
+        return bedId != null ? bedId.hashCode() : 0;
+    }
+    
+    @Override
+    public String toString() {
+        return getDisplayName();
+    }
 }

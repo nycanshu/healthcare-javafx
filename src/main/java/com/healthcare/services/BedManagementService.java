@@ -18,18 +18,19 @@ public class BedManagementService implements IBedManagementService {
 
     @Override
     public Bed save(Bed bed) {
-        String sql = "INSERT INTO Beds (room_id, bed_number, bed_type, is_occupied, occupied_by, gender_restriction, isolation_required) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Beds (room_id, bed_number, bed_code, bed_type, is_occupied, occupied_by, gender_restriction, isolation_required) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             
             stmt.setLong(1, bed.getRoomId());
             stmt.setString(2, bed.getBedNumber());
-            stmt.setString(3, bed.getBedType().name());
-            stmt.setBoolean(4, bed.isOccupied());
-            stmt.setLong(5, bed.getOccupiedBy() != null ? bed.getOccupiedBy() : 0);
-            stmt.setString(6, bed.getGenderRestriction().name());
-            stmt.setBoolean(7, bed.isIsolationRequired());
+            stmt.setString(3, bed.getBedCode());
+            stmt.setString(4, bed.getBedType().name());
+            stmt.setBoolean(5, bed.isOccupied());
+            stmt.setLong(6, bed.getOccupiedBy() != null ? bed.getOccupiedBy() : 0);
+            stmt.setString(7, bed.getGenderRestriction().name());
+            stmt.setBoolean(8, bed.isIsolationRequired());
             
             int rowsAffected = stmt.executeUpdate();
             if (rowsAffected > 0) {
@@ -533,6 +534,7 @@ public class BedManagementService implements IBedManagementService {
         bed.setBedId(rs.getLong("bed_id"));
         bed.setRoomId(rs.getLong("room_id"));
         bed.setBedNumber(rs.getString("bed_number"));
+        bed.setBedCode(rs.getString("bed_code"));
         bed.setBedType(Bed.BedType.valueOf(rs.getString("bed_type")));
         bed.setOccupied(rs.getBoolean("is_occupied"));
         

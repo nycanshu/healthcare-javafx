@@ -13,7 +13,6 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - mysql_data:/var/lib/mysql
       - ./database/init/improved_schema.sql:/docker-entrypoint-initdb.d/01-improved-schema.sql
     command: --default-authentication-plugin=mysql_native_password
 
@@ -31,5 +30,3 @@ services:
     depends_on:
       - mysql
 
-volumes:
-  mysql_data:
