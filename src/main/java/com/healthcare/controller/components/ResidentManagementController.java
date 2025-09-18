@@ -6,6 +6,7 @@ import com.healthcare.model.ActionLog;
 import com.healthcare.model.Staff;
 import com.healthcare.services.BedManagementService;
 import com.healthcare.services.ResidentService;
+import com.healthcare.services.StaffService;
 import com.healthcare.services.ActionLogService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -54,6 +55,11 @@ public class ResidentManagementController implements Initializable {
     @FXML private Label dischargedResidentsCountLabel;
     @FXML private Label availableBedsCountLabel;
     
+    // FXML Elements - Assign Doctor
+    @FXML private ComboBox<Staff> doctorComboBox;
+    @FXML private ComboBox<String> patientComboBox;
+    @FXML private Button assignDoctorButton;
+    
     // FXML Elements - Search and Filter
     @FXML private TextField searchField;
     @FXML private ComboBox<String> statusFilterComboBox;
@@ -67,6 +73,7 @@ public class ResidentManagementController implements Initializable {
     // Services
     private ResidentService residentService = new ResidentService();
     private BedManagementService bedService = new BedManagementService();
+    private StaffService staffService = new StaffService();
     private ActionLogService actionLogService = new ActionLogService();
     
     // Current staff for action logging
@@ -77,6 +84,7 @@ public class ResidentManagementController implements Initializable {
         setupTable();
         setupForm();
         setupSearch();
+        setupAssignDoctor();
         loadResidentsData();
     }
     
@@ -626,4 +634,121 @@ public class ResidentManagementController implements Initializable {
         alert.setContentText(message);
         alert.showAndWait();
     }
+    
+    // Assign Doctor functionality
+    private void setupAssignDoctor() {
+        System.out.println("Setting up assign doctor functionality...");
+        
+        // Load doctors into combo box
+        loadDoctors();
+        
+        // Load patients into combo box
+        loadPatients();
+    }
+    
+    private void loadDoctors() {
+        try {
+            List<Staff> allStaff = staffService.findAll();
+            List<Staff> doctors = allStaff.stream()
+                .filter(staff -> staff.getRole() == Staff.Role.Doctor)
+                .collect(java.util.stream.Collectors.toList());
+            
+            doctorComboBox.setItems(FXCollections.observableArrayList(doctors));
+            doctorComboBox.setCellFactory(listView -> new ListCell<Staff>() {
+                @Override
+                protected void updateItem(Staff staff, boolean empty) {
+                    super.updateItem(staff, empty);
+                    if (empty || staff == null) {
+                        setText(null);
+                    } else {
+                        setText(staff.getFullName() + " (" + staff.getUsername() + ")");
+                    }
+                }
+            });
+            
+            doctorComboBox.setButtonCell(new ListCell<Staff>() {
+                @Override
+                protected void updateItem(Staff staff, boolean empty) {
+                    super.updateItem(staff, empty);
+                    if (empty || staff == null) {
+                        setText(null);
+                    } else {
+                        setText(staff.getFullName() + " (" + staff.getUsername() + ")");
+                    }
+                }
+            });
+            
+        } catch (Exception e) {
+            System.err.println("Error loading doctors: " + e.getMessage());
+            showError("Failed to load doctors");
+        }
+    }
+    
+    private void loadPatients() {
+        try {
+            List<Resident> residents = residentService.findAll();
+            List<String> patientNames = residents.stream()
+                .map(resident -> resident.getFirstName() + " " + resident.getLastName())
+                .collect(java.util.stream.Collectors.toList());
+            
+            patientComboBox.setItems(FXCollections.observableArrayList(patientNames));
+            
+        } catch (Exception e) {
+            System.err.println("Error loading patients: " + e.getMessage());
+            showError("Failed to load patients");
+        }
+    }
+    
+    @FXML
+    private void assignDoctorToPatient() {
+        Staff selectedDoctor = doctorComboBox.getValue();
+        String selectedPatient = patientComboBox.getValue();
+        
+        if (selectedDoctor == null || selectedPatient == null) {
+            showError("Please select both a doctor and a patient");
+            return;
+        }
+        
+        try {
+            // Find the resident by name
+            List<Resident> residents = residentService.findAll();
+            Resident targetResident = residents.stream()
+                .filter(resident -> (resident.getFirstName() + " " + resident.getLastName()).equals(selectedPatient))
+                .findFirst()
+                .orElse(null);
+            
+            if (targetResident == null) {
+                showError("Patient not found");
+                return;
+            }
+            
+            // Update the resident's assigned doctor
+            targetResident.setAssignedDoctorId(selectedDoctor.getStaffId());
+            residentService.update(targetResident);
+            
+            // Log the action
+            if (currentStaff != null) {
+                actionLogService.save(new ActionLog(
+                    currentStaff.getStaffId(),
+                    ActionLog.ActionType.Update,
+                    "Assigned doctor to patient",
+                    "Assigned Dr. " + selectedDoctor.getFullName() + " to " + selectedPatient
+                ));
+            }
+            
+            showSuccess("Successfully assigned Dr. " + selectedDoctor.getFullName() + " to " + selectedPatient);
+            
+            // Clear selections
+            doctorComboBox.setValue(null);
+            patientComboBox.setValue(null);
+            
+            // Refresh the residents list to show updated assignments
+            loadResidentsData();
+            
+        } catch (Exception e) {
+            System.err.println("Error assigning doctor: " + e.getMessage());
+            showError("Failed to assign doctor: " + e.getMessage());
+        }
+    }
+    
 }

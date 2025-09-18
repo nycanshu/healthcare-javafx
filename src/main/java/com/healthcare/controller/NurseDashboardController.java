@@ -21,9 +21,9 @@ public class NurseDashboardController extends BaseDashboardController {
     @FXML
     private Label myPatientsLabel;
     @FXML
-    private Label todaysMedicationsLabel;
+    private Label todaysTasksLabel;
     @FXML
-    private Label pendingTasksLabel;
+    private Label pendingMedicationsLabel;
     @FXML
     private ListView<String> recentActivityList;
     
@@ -33,7 +33,7 @@ public class NurseDashboardController extends BaseDashboardController {
     @FXML
     private Button patientCareButton;
     @FXML
-    private Button medicationButton;
+    private Button medicationsButton;
     @FXML
     private Button reportsButton;
     
@@ -45,7 +45,7 @@ public class NurseDashboardController extends BaseDashboardController {
     @FXML
     private VBox patientCareContent;
     @FXML
-    private VBox medicationContent;
+    private VBox medicationsContent;
     @FXML
     private VBox reportsContent;
     
@@ -81,9 +81,9 @@ public class NurseDashboardController extends BaseDashboardController {
     }
     
     @FXML
-    private void showMedication() {
-        setActiveButton(medicationButton);
-        showContent(medicationContent);
+    private void showMedications() {
+        setActiveButton(medicationsButton);
+        showContent(medicationsContent);
         loadMedicationData();
     }
     
@@ -102,8 +102,8 @@ public class NurseDashboardController extends BaseDashboardController {
             
             totalResidentsLabel.setText("0"); // TODO: Implement ResidentService
             myPatientsLabel.setText("0"); // TODO: Implement Nurse-specific patient count
-            todaysMedicationsLabel.setText("0"); // TODO: Implement medication service
-            pendingTasksLabel.setText("0"); // TODO: Implement task service
+            todaysTasksLabel.setText("0"); // TODO: Implement task service
+            pendingMedicationsLabel.setText("0"); // TODO: Implement medication service
             
             // Load recent activity
             loadRecentActivity();
@@ -140,10 +140,10 @@ public class NurseDashboardController extends BaseDashboardController {
     private void loadMedicationData() {
         try {
             // TODO: Load medication component
-            medicationContent.getChildren().clear();
+            medicationsContent.getChildren().clear();
             Label placeholder = new Label("Medication Management - Coming Soon");
             placeholder.setStyle("-fx-font-size: 18px; -fx-text-fill: #666;");
-            medicationContent.getChildren().add(placeholder);
+            medicationsContent.getChildren().add(placeholder);
             
             System.out.println("Medication component loaded successfully");
         } catch (Exception e) {
@@ -179,7 +179,7 @@ public class NurseDashboardController extends BaseDashboardController {
         
         // Reset all buttons
         List<Button> buttons = List.of(
-            dashboardButton, patientCareButton, medicationButton, reportsButton
+            dashboardButton, patientCareButton, medicationsButton, reportsButton
         );
         
         for (Button button : buttons) {
@@ -210,7 +210,7 @@ public class NurseDashboardController extends BaseDashboardController {
     private void showContent(VBox content) {
         // Hide all content areas
         List<VBox> contentAreas = List.of(
-            dashboardContent, patientCareContent, medicationContent, reportsContent
+            dashboardContent, patientCareContent, medicationsContent, reportsContent
         );
         
         for (VBox area : contentAreas) {

@@ -18,10 +18,13 @@
 /Users/himanshukumar/Documents/personal/healthcare-javafx/src/main/java/com/healthcare/controller/components/ReportsArchivesController.java
 /Users/himanshukumar/Documents/personal/healthcare-javafx/src/main/java/com/healthcare/model/AdministeredMedication.java
 /Users/himanshukumar/Documents/personal/healthcare-javafx/src/main/java/com/healthcare/services/ResidentService.java
+/Users/himanshukumar/Documents/personal/healthcare-javafx/src/main/java/com/healthcare/controller/components/MyPatientsController.java
 /Users/himanshukumar/Documents/personal/healthcare-javafx/src/main/java/com/healthcare/model/ShiftSchedule.java
 /Users/himanshukumar/Documents/personal/healthcare-javafx/src/main/java/com/healthcare/controller/components/ResidentManagementController.java
 /Users/himanshukumar/Documents/personal/healthcare-javafx/src/main/java/com/healthcare/services/ActionLogService.java
 /Users/himanshukumar/Documents/personal/healthcare-javafx/src/main/java/com/healthcare/model/Resident.java
+/Users/himanshukumar/Documents/personal/healthcare-javafx/src/main/java/com/healthcare/controller/components/DoctorReportsController.java
+/Users/himanshukumar/Documents/personal/healthcare-javafx/src/main/java/com/healthcare/services/PrescriptionService.java
 /Users/himanshukumar/Documents/personal/healthcare-javafx/src/main/java/com/healthcare/config/DBConnection.java
 /Users/himanshukumar/Documents/personal/healthcare-javafx/src/main/java/com/healthcare/controller/components/StaffManagementController.java
 /Users/himanshukumar/Documents/personal/healthcare-javafx/src/main/java/com/healthcare/Main.java
@@ -32,6 +35,8 @@
 /Users/himanshukumar/Documents/personal/healthcare-javafx/src/main/java/com/healthcare/services/ShiftManagementService.java
 /Users/himanshukumar/Documents/personal/healthcare-javafx/src/main/java/com/healthcare/util/TestDatabase.java
 /Users/himanshukumar/Documents/personal/healthcare-javafx/src/main/java/com/healthcare/services/StaffService.java
+/Users/himanshukumar/Documents/personal/healthcare-javafx/src/main/java/com/healthcare/services/MedicineService.java
+/Users/himanshukumar/Documents/personal/healthcare-javafx/src/main/java/com/healthcare/controller/components/PrescriptionManagementController.java
 /Users/himanshukumar/Documents/personal/healthcare-javafx/src/main/java/com/healthcare/model/Prescription.java
 /Users/himanshukumar/Documents/personal/healthcare-javafx/src/main/java/com/healthcare/controller/LoginController.java
 /Users/himanshukumar/Documents/personal/healthcare-javafx/src/main/java/com/healthcare/model/Staff.java

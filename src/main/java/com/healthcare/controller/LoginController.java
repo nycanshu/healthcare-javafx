@@ -62,6 +62,8 @@ public class LoginController implements Initializable {
         String username = usernameField.getText().trim();
         String password = passwordField.getText().trim();
         
+        System.out.println("Login attempt: username=" + username + ", password=" + password);
+        
         if (username.isEmpty() || password.isEmpty()) {
             showError("Please enter both username and password");
             return;
@@ -72,18 +74,23 @@ public class LoginController implements Initializable {
         // JPA Service authentication
         new Thread(() -> {
             try {
+                System.out.println("Authenticating user: " + username);
                 Optional<Staff> staff = staffService.authenticate(username, password);
                 
                 Platform.runLater(() -> {
                     setLoading(false);
                     
                     if (staff.isPresent()) {
+                        System.out.println("Login successful for: " + staff.get().getUsername() + " with role: " + staff.get().getRole());
                         navigateToDashboard(staff.get());
                     } else {
+                        System.out.println("Login failed: Invalid credentials");
                         showError("Invalid username or password");
                     }
                 });
             } catch (Exception e) {
+                System.err.println("Login error: " + e.getMessage());
+                e.printStackTrace();
                 Platform.runLater(() -> {
                     setLoading(false);
                     showError("Login failed: " + e.getMessage());
@@ -95,12 +102,17 @@ public class LoginController implements Initializable {
     private void navigateToDashboard(Staff staff) {
         try {
             String dashboardFxml = getDashboardFxml(staff.getRole());
+            System.out.println("Navigating to dashboard: " + dashboardFxml + " for role: " + staff.getRole());
+            
             FXMLLoader loader = new FXMLLoader(getClass().getResource(dashboardFxml));
             Scene scene = new Scene(loader.load(), 1200, 800);
             
             // Set up the dashboard controller
             Object controller = loader.getController();
+            System.out.println("Dashboard controller loaded: " + controller.getClass().getSimpleName());
+            
             if (controller instanceof BaseDashboardController) {
+                System.out.println("Setting current staff and primary stage");
                 ((BaseDashboardController) controller).setCurrentStaff(staff);
                 ((BaseDashboardController) controller).setPrimaryStage(primaryStage);
             }
@@ -112,7 +124,11 @@ public class LoginController implements Initializable {
             primaryStage.centerOnScreen();
             primaryStage.show();
             
+            System.out.println("Dashboard navigation completed successfully");
+            
         } catch (IOException e) {
+            System.err.println("Failed to load dashboard: " + e.getMessage());
+            e.printStackTrace();
             showError("Failed to load dashboard: " + e.getMessage());
         }
     }

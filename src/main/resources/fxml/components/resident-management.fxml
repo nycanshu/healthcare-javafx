@@ -102,6 +102,36 @@
          </children>
       </VBox>
       
+      <!-- Assign Doctor Section -->
+      <VBox spacing="15">
+         <children>
+            <Label text="👨‍⚕️ Assign Doctor to Patients" textFill="#2E86AB" 
+                   style="-fx-font-size: 18px; -fx-font-weight: bold;" />
+            
+            <HBox spacing="15" alignment="CENTER_LEFT">
+               <children>
+                  <Label text="Select Doctor:" textFill="#34495E" 
+                         style="-fx-font-size: 14px; -fx-font-weight: bold;" />
+                  
+                  <ComboBox fx:id="doctorComboBox" promptText="Choose a doctor..." 
+                            prefWidth="200" />
+                  
+                  <Label text="Select Patient:" textFill="#34495E" 
+                         style="-fx-font-size: 14px; -fx-font-weight: bold;" />
+                  
+                  <ComboBox fx:id="patientComboBox" promptText="Choose a patient..." 
+                            prefWidth="200" />
+                  
+                  <Button fx:id="assignDoctorButton" text="🔗 Assign Doctor" 
+                          style="-fx-background-color: #9B59B6; -fx-text-fill: white; 
+                                 -fx-background-radius: 8; -fx-padding: 10 20; 
+                                 -fx-font-weight: bold; -fx-font-size: 14px;" 
+                          onAction="#assignDoctorToPatient" />
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+      
       <!-- Current Residents Section -->
       <VBox spacing="15">
          <children>

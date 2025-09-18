@@ -46,6 +46,7 @@ public class StaffManagementController implements Initializable {
     @FXML private Label nursesCountLabel;
     @FXML private TextField searchField;
     
+    
     // Data
     private ObservableList<Staff> staffList = FXCollections.observableArrayList();
     private FilteredList<Staff> filteredStaffList;
@@ -357,4 +358,5 @@ public class StaffManagementController implements Initializable {
         alert.setContentText(message);
         alert.showAndWait();
     }
+    
 }

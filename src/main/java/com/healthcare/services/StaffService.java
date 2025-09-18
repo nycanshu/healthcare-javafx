@@ -106,6 +106,8 @@ public class StaffService implements IStaffService {
     public Optional<Staff> authenticate(String username, String password) {
         String sql = "SELECT * FROM Staff WHERE username = ? AND password = ?";
         
+        System.out.println("StaffService: Authenticating user: " + username);
+        
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
@@ -114,11 +116,16 @@ public class StaffService implements IStaffService {
             ResultSet rs = stmt.executeQuery();
             
             if (rs.next()) {
-                return Optional.of(mapResultSetToStaff(rs));
+                Staff staff = mapResultSetToStaff(rs);
+                System.out.println("StaffService: Authentication successful for: " + staff.getUsername() + " with role: " + staff.getRole());
+                return Optional.of(staff);
+            } else {
+                System.out.println("StaffService: No matching user found for: " + username);
             }
             
         } catch (SQLException e) {
-            System.err.println("Error authenticating staff: " + e.getMessage());
+            System.err.println("StaffService: Error authenticating staff: " + e.getMessage());
+            e.printStackTrace();
         }
         
         return Optional.empty();

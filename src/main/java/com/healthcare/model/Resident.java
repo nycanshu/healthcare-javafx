@@ -3,7 +3,6 @@ package com.healthcare.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -18,7 +17,6 @@ import java.util.List;
 @Table(name = "Residents")
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class Resident {
     
     @Id
@@ -48,6 +46,9 @@ public class Resident {
     @Column(name = "current_bed_id")
     private Long currentBedId;
     
+    @Column(name = "assigned_doctor_id")
+    private Long assignedDoctorId;
+    
     @Column(name = "medical_condition")
     private String medicalCondition;
     
@@ -67,6 +68,10 @@ public class Resident {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "current_bed_id", insertable = false, updatable = false)
     private Bed currentBed;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "assigned_doctor_id", insertable = false, updatable = false)
+    private Staff assignedDoctor;
     
     @OneToMany(mappedBy = "resident", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Prescription> prescriptions = new ArrayList<>();
@@ -181,6 +186,12 @@ public class Resident {
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
     
+    public Long getAssignedDoctorId() { return assignedDoctorId; }
+    public void setAssignedDoctorId(Long assignedDoctorId) { this.assignedDoctorId = assignedDoctorId; }
+    
     public Bed getCurrentBed() { return currentBed; }
     public void setCurrentBed(Bed currentBed) { this.currentBed = currentBed; }
+    
+    public Staff getAssignedDoctor() { return assignedDoctor; }
+    public void setAssignedDoctor(Staff assignedDoctor) { this.assignedDoctor = assignedDoctor; }
 }

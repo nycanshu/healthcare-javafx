@@ -52,6 +52,7 @@ CREATE TABLE Residents (
     admission_date DATE NOT NULL,
     discharge_date DATE NULL,
     current_bed_id INT NULL,
+    assigned_doctor_id INT NULL, -- Doctor assigned to this resident
     medical_condition TEXT,
     requires_isolation BOOLEAN DEFAULT FALSE,
     emergency_contact VARCHAR(200),
@@ -111,9 +112,14 @@ CREATE TABLE Prescriptions (
     prescription_date DATE NOT NULL,
     notes TEXT,
     status ENUM('Active', 'Completed', 'Cancelled') DEFAULT 'Active',
+    review_status ENUM('Pending', 'Reviewed', 'Approved', 'Rejected') DEFAULT 'Pending',
+    review_notes TEXT,
+    reviewed_by INT NULL,
+    reviewed_at TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (resident_id) REFERENCES Residents(resident_id),
-    FOREIGN KEY (doctor_id) REFERENCES Staff(staff_id)
+    FOREIGN KEY (doctor_id) REFERENCES Staff(staff_id),
+    FOREIGN KEY (reviewed_by) REFERENCES Staff(staff_id)
 );
 
 -- Medicines Table (Enhanced)
@@ -122,6 +128,8 @@ CREATE TABLE Medicines (
     name VARCHAR(100) NOT NULL,
     description TEXT,
     dosage_unit VARCHAR(20) DEFAULT 'mg',
+    category VARCHAR(50), -- e.g., 'Pain Relief', 'Antibiotic', 'Cardiovascular'
+    classification VARCHAR(50), -- e.g., 'Prescription', 'Over-the-counter', 'Controlled'
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -178,6 +186,7 @@ CREATE TABLE Archive (
     FOREIGN KEY (resident_id) REFERENCES Residents(resident_id)
 );
 
+
 -- =====================================================
 -- ADDITIONAL FOREIGN KEY CONSTRAINTS
 -- =====================================================
@@ -189,6 +198,10 @@ ALTER TABLE Beds ADD CONSTRAINT fk_bed_occupied_by
 -- Add foreign key constraint for Residents.current_bed_id after all tables are created
 ALTER TABLE Residents ADD CONSTRAINT fk_resident_current_bed 
     FOREIGN KEY (current_bed_id) REFERENCES Beds(bed_id);
+
+-- Add foreign key constraint for Residents.assigned_doctor_id after all tables are created
+ALTER TABLE Residents ADD CONSTRAINT fk_resident_assigned_doctor 
+    FOREIGN KEY (assigned_doctor_id) REFERENCES Staff(staff_id);
 
 -- =====================================================
 -- SAMPLE DATA INSERTION
@@ -295,8 +308,20 @@ INSERT INTO Shifts (shift_name, shift_type, start_time, end_time, ward_id) VALUE
 ('Doctor Round', 'Doctor', '09:00:00', '10:00:00', 2);
 
 -- Insert Sample Medicines
-INSERT INTO Medicines (name, description, dosage_unit) VALUES 
-('Paracetamol', 'Pain relief and fever reducer', 'mg'),
-('Ibuprofen', 'Anti-inflammatory pain relief', 'mg'),
-('Insulin', 'Blood sugar management', 'units'),
-('Morphine', 'Strong pain relief', 'mg');
+INSERT INTO Medicines (name, description, dosage_unit, category, classification) VALUES 
+('Paracetamol', 'Pain relief and fever reducer', 'mg', 'Pain Relief', 'Over-the-counter'),
+('Ibuprofen', 'Anti-inflammatory pain relief', 'mg', 'Pain Relief', 'Over-the-counter'),
+('Insulin', 'Blood sugar management', 'units', 'Endocrine', 'Prescription'),
+('Morphine', 'Strong pain relief', 'mg', 'Pain Relief', 'Controlled'),
+('Amoxicillin', 'Antibiotic for bacterial infections', 'mg', 'Antibiotic', 'Prescription'),
+('Metformin', 'Diabetes medication', 'mg', 'Endocrine', 'Prescription'),
+('Lisinopril', 'ACE inhibitor for hypertension', 'mg', 'Cardiovascular', 'Prescription'),
+('Aspirin', 'Blood thinner and pain relief', 'mg', 'Cardiovascular', 'Over-the-counter');
+
+-- Insert Sample Residents with Doctor Assignments
+INSERT INTO Residents (first_name, last_name, gender, birth_date, admission_date, assigned_doctor_id, medical_condition, emergency_contact) VALUES 
+('John', 'Doe', 'M', '1980-05-15', '2024-01-15', 2, 'Diabetes Type 2', 'Jane Doe - 555-0101'),
+('Mary', 'Smith', 'F', '1975-08-22', '2024-01-20', 2, 'Hypertension', 'Bob Smith - 555-0102'),
+('Robert', 'Johnson', 'M', '1965-12-10', '2024-01-25', 3, 'Post-surgery recovery', 'Linda Johnson - 555-0103'),
+('Sarah', 'Wilson', 'F', '1990-03-08', '2024-02-01', 3, 'Pneumonia', 'Mike Wilson - 555-0104');
+

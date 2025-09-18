@@ -2,6 +2,7 @@ package com.healthcare.controller;
 
 import com.healthcare.model.Staff;
 import com.healthcare.services.StaffService;
+import com.healthcare.controller.components.MyPatientsController;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
@@ -54,9 +55,11 @@ public class DoctorDashboardController extends BaseDashboardController {
 
     @Override
     public void initialize(java.net.URL location, java.util.ResourceBundle resources) {
+        System.out.println("DoctorDashboardController: Initializing...");
         super.initialize(location, resources);
         setupNavigation();
         loadDashboardData();
+        System.out.println("DoctorDashboardController: Initialization complete");
     }
     
     private void setupNavigation() {
@@ -124,15 +127,26 @@ public class DoctorDashboardController extends BaseDashboardController {
     
     private void loadPatientManagementData() {
         try {
-            // TODO: Load patient management component
-            patientManagementContent.getChildren().clear();
-            Label placeholder = new Label("Patient Management - Coming Soon");
-            placeholder.setStyle("-fx-font-size: 18px; -fx-text-fill: #666;");
-            patientManagementContent.getChildren().add(placeholder);
+            // Check if currentStaff is set
+            if (currentStaff == null) {
+                System.out.println("Current staff not set yet, skipping My Patients component loading");
+                return;
+            }
             
-            System.out.println("Patient management component loaded successfully");
+            // Load My Patients component
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/components/my-patients.fxml"));
+            VBox myPatientsComponent = loader.load();
+            
+            // Set current doctor in the component
+            MyPatientsController controller = loader.getController();
+            controller.setCurrentDoctor(currentStaff);
+            
+            patientManagementContent.getChildren().clear();
+            patientManagementContent.getChildren().add(myPatientsComponent);
+            
+            System.out.println("My Patients component loaded successfully");
         } catch (Exception e) {
-            System.err.println("Error loading patient management component: " + e.getMessage());
+            System.err.println("Error loading My Patients component: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -229,5 +243,11 @@ public class DoctorDashboardController extends BaseDashboardController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+    
+    @Override
+    public void setCurrentStaff(Staff currentStaff) {
+        System.out.println("DoctorDashboardController: Setting current staff to: " + (currentStaff != null ? currentStaff.getUsername() : "null"));
+        super.setCurrentStaff(currentStaff);
     }
 }
