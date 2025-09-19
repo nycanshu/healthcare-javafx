@@ -69,6 +69,7 @@ public class MyPatientsController implements Initializable {
     
     public void setCurrentDoctor(Staff doctor) {
         this.currentDoctor = doctor;
+        System.out.println("MyPatientsController: Setting current doctor to: " + (doctor != null ? doctor.getFullName() : "null"));
         loadData();
     }
     
@@ -201,6 +202,8 @@ public class MyPatientsController implements Initializable {
                 System.out.println("No current doctor set, cannot load patients");
                 return;
             }
+            
+            System.out.println("Loading patients for doctor: " + currentDoctor.getFullName() + " (ID: " + currentDoctor.getStaffId() + ")");
             
             // Load all patients assigned to this doctor
             List<Resident> allResidents = residentService.findAll();

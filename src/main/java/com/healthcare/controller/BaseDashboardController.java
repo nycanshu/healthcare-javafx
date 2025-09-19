@@ -41,7 +41,10 @@ public abstract class BaseDashboardController implements Initializable {
     private void updateUserInfo() {
         if (currentStaff != null) {
             if (welcomeLabel != null) {
-                welcomeLabel.setText("Welcome, " + currentStaff.getUsername());
+                String displayName = currentStaff.getFullName() != null && !currentStaff.getFullName().trim().isEmpty() 
+                    ? currentStaff.getFullName() 
+                    : currentStaff.getUsername();
+                welcomeLabel.setText("Welcome, " + displayName);
             }
             if (userRoleLabel != null) {
                 userRoleLabel.setText("Role: " + currentStaff.getRole());

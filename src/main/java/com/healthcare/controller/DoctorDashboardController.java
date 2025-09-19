@@ -1,7 +1,11 @@
 package com.healthcare.controller;
 
 import com.healthcare.model.Staff;
+import com.healthcare.model.Resident;
+import com.healthcare.model.Prescription;
 import com.healthcare.services.StaffService;
+import com.healthcare.services.ResidentService;
+import com.healthcare.services.PrescriptionService;
 import com.healthcare.controller.components.MyPatientsController;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -9,6 +13,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Controller for the Doctor Dashboard
@@ -37,6 +42,8 @@ public class DoctorDashboardController extends BaseDashboardController {
     private Button prescriptionsButton;
     @FXML
     private Button reportsButton;
+    @FXML
+    private Button medicinesButton;
     
     // Content areas
     @FXML
@@ -49,9 +56,13 @@ public class DoctorDashboardController extends BaseDashboardController {
     private VBox prescriptionsContent;
     @FXML
     private VBox reportsContent;
+    @FXML
+    private VBox medicinesContent;
     
     // Services
     private StaffService staffService = new StaffService();
+    private ResidentService residentService = new ResidentService();
+    private PrescriptionService prescriptionService = new PrescriptionService();
 
     @Override
     public void initialize(java.net.URL location, java.util.ResourceBundle resources) {
@@ -97,32 +108,91 @@ public class DoctorDashboardController extends BaseDashboardController {
         loadReportsData();
     }
     
+    @FXML
+    private void showMedicines() {
+        setActiveButton(medicinesButton);
+        showContent(medicinesContent);
+        loadMedicinesData();
+    }
+    
     // Data loading methods
     private void loadDashboardData() {
         try {
-            // Load statistics using simple services
-            long totalStaff = staffService.findAll().size();
+            if (currentStaff == null) {
+                System.out.println("Current staff not set, cannot load dashboard data");
+                return;
+            }
             
-            totalResidentsLabel.setText("0"); // TODO: Implement ResidentService
-            myPatientsLabel.setText("0"); // TODO: Implement Doctor-specific patient count
-            todaysAppointmentsLabel.setText("0"); // TODO: Implement appointment service
-            pendingPrescriptionsLabel.setText("0"); // TODO: Implement prescription service
+            // Load total residents count
+            List<Resident> allResidents = residentService.findActiveResidents();
+            totalResidentsLabel.setText(String.valueOf(allResidents.size()));
+            
+            // Load doctor's assigned patients count
+            List<Resident> myPatients = allResidents.stream()
+                .filter(resident -> resident.getAssignedDoctorId() != null && 
+                        resident.getAssignedDoctorId().equals(currentStaff.getStaffId()))
+                .collect(Collectors.toList());
+            myPatientsLabel.setText(String.valueOf(myPatients.size()));
+            
+            // Load today's appointments (using today's prescriptions as proxy)
+            List<Prescription> todaysPrescriptions = prescriptionService.findTodaysByDoctorId(currentStaff.getStaffId());
+            todaysAppointmentsLabel.setText(String.valueOf(todaysPrescriptions.size()));
+            
+            // Load pending prescriptions for this doctor
+            List<Prescription> pendingPrescriptions = prescriptionService.findPendingByDoctorId(currentStaff.getStaffId());
+            pendingPrescriptionsLabel.setText(String.valueOf(pendingPrescriptions.size()));
             
             // Load recent activity
             loadRecentActivity();
             
+            System.out.println("Dashboard data loaded successfully for Dr. " + currentStaff.getFullName());
+            System.out.println("Total patients: " + allResidents.size() + ", My patients: " + myPatients.size() + 
+                             ", Today's appointments: " + todaysPrescriptions.size() + ", Pending prescriptions: " + pendingPrescriptions.size());
+            
         } catch (Exception e) {
+            System.err.println("Error loading dashboard data: " + e.getMessage());
+            e.printStackTrace();
             showError("Failed to load dashboard data: " + e.getMessage());
         }
     }
     
     private void loadRecentActivity() {
         recentActivityList.getItems().clear();
-        recentActivityList.getItems().addAll(
-            "System started successfully",
-            "Doctor logged in",
-            "Dashboard loaded"
-        );
+        
+        if (currentStaff != null) {
+            // Load real activity based on doctor's recent actions
+            try {
+                List<Prescription> recentPrescriptions = prescriptionService.findByDoctorId(currentStaff.getStaffId());
+                
+                // Add recent prescription activities
+                recentPrescriptions.stream()
+                    .limit(5)
+                    .forEach(prescription -> {
+                        String activity = "Prescribed medication for patient ID: " + prescription.getResidentId() + 
+                                        " on " + prescription.getPrescriptionDate();
+                        recentActivityList.getItems().add(activity);
+                    });
+                
+                // Add login activity
+                recentActivityList.getItems().add("Dr. " + currentStaff.getFullName() + " logged in");
+                recentActivityList.getItems().add("Dashboard loaded successfully");
+                
+            } catch (Exception e) {
+                System.err.println("Error loading recent activity: " + e.getMessage());
+                // Fallback to default activities
+                recentActivityList.getItems().addAll(
+                    "Dr. " + currentStaff.getFullName() + " logged in",
+                    "Dashboard loaded",
+                    "System ready"
+                );
+            }
+        } else {
+            recentActivityList.getItems().addAll(
+                "System started successfully",
+                "Doctor logged in",
+                "Dashboard loaded"
+            );
+        }
     }
     
     private void loadPatientManagementData() {
@@ -133,6 +203,9 @@ public class DoctorDashboardController extends BaseDashboardController {
                 return;
             }
             
+            // Clear existing content first
+            patientManagementContent.getChildren().clear();
+            
             // Load My Patients component
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/components/my-patients.fxml"));
             VBox myPatientsComponent = loader.load();
@@ -141,43 +214,117 @@ public class DoctorDashboardController extends BaseDashboardController {
             MyPatientsController controller = loader.getController();
             controller.setCurrentDoctor(currentStaff);
             
-            patientManagementContent.getChildren().clear();
             patientManagementContent.getChildren().add(myPatientsComponent);
             
-            System.out.println("My Patients component loaded successfully");
+            System.out.println("My Patients component loaded successfully for Dr. " + currentStaff.getFullName());
         } catch (Exception e) {
             System.err.println("Error loading My Patients component: " + e.getMessage());
             e.printStackTrace();
+            
+            // Show error message in the content area
+            Label errorLabel = new Label("Error loading patient data: " + e.getMessage());
+            errorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 14px;");
+            patientManagementContent.getChildren().clear();
+            patientManagementContent.getChildren().add(errorLabel);
         }
     }
     
     private void loadPrescriptionsData() {
         try {
-            // TODO: Load prescriptions component
-            prescriptionsContent.getChildren().clear();
-            Label placeholder = new Label("Prescriptions Management - Coming Soon");
-            placeholder.setStyle("-fx-font-size: 18px; -fx-text-fill: #666;");
-            prescriptionsContent.getChildren().add(placeholder);
+            if (currentStaff == null) {
+                System.out.println("Current staff not set yet, skipping Prescriptions component loading");
+                return;
+            }
             
-            System.out.println("Prescriptions component loaded successfully");
+            // Clear existing content first
+            prescriptionsContent.getChildren().clear();
+            
+            // Load Prescriptions component
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/components/prescription-management.fxml"));
+            VBox prescriptionsComponent = loader.load();
+            
+            // Set current doctor in the component
+            com.healthcare.controller.components.PrescriptionManagementController controller = loader.getController();
+            controller.setCurrentDoctor(currentStaff);
+            
+            prescriptionsContent.getChildren().add(prescriptionsComponent);
+            
+            System.out.println("Prescriptions component loaded successfully for Dr. " + currentStaff.getFullName());
         } catch (Exception e) {
-            System.err.println("Error loading prescriptions component: " + e.getMessage());
+            System.err.println("Error loading Prescriptions component: " + e.getMessage());
             e.printStackTrace();
+            
+            // Show error message in the content area
+            Label errorLabel = new Label("Error loading prescription data: " + e.getMessage());
+            errorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 14px;");
+            prescriptionsContent.getChildren().clear();
+            prescriptionsContent.getChildren().add(errorLabel);
         }
     }
     
     private void loadReportsData() {
         try {
-            // TODO: Load reports component
-            reportsContent.getChildren().clear();
-            Label placeholder = new Label("Reports - Coming Soon");
-            placeholder.setStyle("-fx-font-size: 18px; -fx-text-fill: #666;");
-            reportsContent.getChildren().add(placeholder);
+            if (currentStaff == null) {
+                System.out.println("Current staff not set yet, skipping Reports component loading");
+                return;
+            }
             
-            System.out.println("Reports component loaded successfully");
+            // Clear existing content first
+            reportsContent.getChildren().clear();
+            
+            // Load Reports component
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/components/doctor-reports.fxml"));
+            VBox reportsComponent = loader.load();
+            
+            // Set current doctor in the component
+            com.healthcare.controller.components.DoctorReportsController controller = loader.getController();
+            controller.setCurrentDoctor(currentStaff);
+            
+            reportsContent.getChildren().add(reportsComponent);
+            
+            System.out.println("Reports component loaded successfully for Dr. " + currentStaff.getFullName());
         } catch (Exception e) {
-            System.err.println("Error loading reports component: " + e.getMessage());
+            System.err.println("Error loading Reports component: " + e.getMessage());
             e.printStackTrace();
+            
+            // Show error message in the content area
+            Label errorLabel = new Label("Error loading reports data: " + e.getMessage());
+            errorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 14px;");
+            reportsContent.getChildren().clear();
+            reportsContent.getChildren().add(errorLabel);
+        }
+    }
+    
+    private void loadMedicinesData() {
+        try {
+            if (currentStaff == null) {
+                System.out.println("Current staff not set yet, skipping Medicines component loading");
+                return;
+            }
+            
+            // Clear existing content first
+            medicinesContent.getChildren().clear();
+            
+            // Load Medicines component
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/components/medicine-management.fxml"));
+            VBox medicinesComponent = loader.load();
+            
+            // Set current doctor in the component
+            com.healthcare.controller.components.MedicineManagementController controller = loader.getController();
+            controller.setCurrentDoctor(currentStaff);
+            
+            medicinesContent.getChildren().add(medicinesComponent);
+            
+            System.out.println("Medicines component loaded successfully for Dr. " + currentStaff.getFullName());
+        } catch (Exception e) {
+            System.err.println("Error loading Medicines component: " + e.getMessage());
+            e.printStackTrace();
+            
+            // Show error message in the content area
+            Label errorLabel = new Label("Error loading medicine data: " + e.getMessage());
+            errorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 14px;");
+            medicinesContent.getChildren().clear();
+            medicinesContent.getChildren().add(errorLabel);
         }
     }
     
@@ -193,7 +340,7 @@ public class DoctorDashboardController extends BaseDashboardController {
         
         // Reset all buttons
         List<Button> buttons = List.of(
-            dashboardButton, patientManagementButton, prescriptionsButton, reportsButton
+            dashboardButton, patientManagementButton, prescriptionsButton, reportsButton, medicinesButton
         );
         
         for (Button button : buttons) {
@@ -224,7 +371,7 @@ public class DoctorDashboardController extends BaseDashboardController {
     private void showContent(VBox content) {
         // Hide all content areas
         List<VBox> contentAreas = List.of(
-            dashboardContent, patientManagementContent, prescriptionsContent, reportsContent
+            dashboardContent, patientManagementContent, prescriptionsContent, reportsContent, medicinesContent
         );
         
         for (VBox area : contentAreas) {
@@ -249,5 +396,10 @@ public class DoctorDashboardController extends BaseDashboardController {
     public void setCurrentStaff(Staff currentStaff) {
         System.out.println("DoctorDashboardController: Setting current staff to: " + (currentStaff != null ? currentStaff.getUsername() : "null"));
         super.setCurrentStaff(currentStaff);
+        
+        // Reload dashboard data when staff is set
+        if (currentStaff != null) {
+            loadDashboardData();
+        }
     }
 }

@@ -57,6 +57,9 @@
             
             <Button fx:id="reportsButton" text="📈 Reports" maxWidth="Infinity" onAction="#showReports">
             </Button>
+            
+            <Button fx:id="medicinesButton" text="💊 Medicines" maxWidth="Infinity" onAction="#showMedicines">
+            </Button>
          </children>
       </VBox>
    </left>
@@ -209,9 +212,6 @@
                   
                   <!-- Patient Management Content -->
                   <VBox fx:id="patientManagementContent" visible="false" managed="false" spacing="20">
-                     <children>
-                        <fx:include source="/fxml/components/my-patients.fxml" />
-                     </children>
                   </VBox>
                   
                   <!-- Prescriptions Content -->
@@ -223,9 +223,10 @@
                   
                   <!-- Reports Content -->
                   <VBox fx:id="reportsContent" visible="false" managed="false" spacing="20">
-                     <children>
-                        <fx:include source="/fxml/components/doctor-reports.fxml" />
-                     </children>
+                  </VBox>
+                  
+                  <!-- Medicines Content -->
+                  <VBox fx:id="medicinesContent" visible="false" managed="false" spacing="20">
                   </VBox>
                </children>
             </VBox>

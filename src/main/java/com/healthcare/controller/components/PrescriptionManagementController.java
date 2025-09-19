@@ -235,24 +235,29 @@ public class PrescriptionManagementController implements Initializable {
         String searchText = searchField.getText().toLowerCase();
         String statusFilter = statusFilterComboBox.getValue();
         
-        prescriptionsList.stream()
-            .filter(prescription -> {
-                // Search filter
-                boolean matchesSearch = searchText.isEmpty() || 
-                    prescription.getNotes().toLowerCase().contains(searchText);
-                
-                // Status filter
-                boolean matchesStatus = statusFilter.equals("All") ||
-                    (statusFilter.equals("Active") && prescription.getStatus() == Prescription.PrescriptionStatus.Active) ||
-                    (statusFilter.equals("Completed") && prescription.getStatus() == Prescription.PrescriptionStatus.Completed) ||
-                    (statusFilter.equals("Cancelled") && prescription.getStatus() == Prescription.PrescriptionStatus.Cancelled) ||
-                    (statusFilter.equals("Pending") && prescription.getReviewStatus() == Prescription.ReviewStatus.Pending) ||
-                    (statusFilter.equals("Reviewed") && prescription.getReviewStatus() == Prescription.ReviewStatus.Reviewed) ||
-                    (statusFilter.equals("Approved") && prescription.getReviewStatus() == Prescription.ReviewStatus.Approved) ||
-                    (statusFilter.equals("Rejected") && prescription.getReviewStatus() == Prescription.ReviewStatus.Rejected);
-                
-                return matchesSearch && matchesStatus;
-            });
+        ObservableList<Prescription> filteredList = FXCollections.observableArrayList();
+        
+        for (Prescription prescription : prescriptionsList) {
+            // Search filter
+            boolean matchesSearch = searchText.isEmpty() || 
+                (prescription.getNotes() != null && prescription.getNotes().toLowerCase().contains(searchText));
+            
+            // Status filter
+            boolean matchesStatus = statusFilter.equals("All") ||
+                (statusFilter.equals("Active") && prescription.getStatus() == Prescription.PrescriptionStatus.Active) ||
+                (statusFilter.equals("Completed") && prescription.getStatus() == Prescription.PrescriptionStatus.Completed) ||
+                (statusFilter.equals("Cancelled") && prescription.getStatus() == Prescription.PrescriptionStatus.Cancelled) ||
+                (statusFilter.equals("Pending") && prescription.getReviewStatus() == Prescription.ReviewStatus.Pending) ||
+                (statusFilter.equals("Reviewed") && prescription.getReviewStatus() == Prescription.ReviewStatus.Reviewed) ||
+                (statusFilter.equals("Approved") && prescription.getReviewStatus() == Prescription.ReviewStatus.Approved) ||
+                (statusFilter.equals("Rejected") && prescription.getReviewStatus() == Prescription.ReviewStatus.Rejected);
+            
+            if (matchesSearch && matchesStatus) {
+                filteredList.add(prescription);
+            }
+        }
+        
+        prescriptionsTable.setItems(filteredList);
     }
     
     // Action methods

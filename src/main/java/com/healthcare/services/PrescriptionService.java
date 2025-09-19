@@ -2,11 +2,7 @@ package com.healthcare.services;
 
 import com.healthcare.config.DBConnection;
 import com.healthcare.model.Prescription;
-import com.healthcare.model.PrescriptionMedicine;
-import com.healthcare.model.Medicine;
-
 import java.sql.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -149,6 +145,58 @@ public class PrescriptionService {
             
         } catch (SQLException e) {
             System.err.println("Error finding prescriptions by review status: " + e.getMessage());
+        }
+        
+        return prescriptions;
+    }
+    
+    /**
+     * Find pending prescriptions for a specific doctor
+     */
+    public List<Prescription> findPendingByDoctorId(Long doctorId) {
+        String sql = "SELECT * FROM Prescriptions WHERE doctor_id = ? AND review_status = 'Pending' ORDER BY prescription_date DESC";
+        
+        List<Prescription> prescriptions = new ArrayList<>();
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setLong(1, doctorId);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    prescriptions.add(mapResultSetToPrescription(rs));
+                }
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("Error finding pending prescriptions by doctor: " + e.getMessage());
+        }
+        
+        return prescriptions;
+    }
+    
+    /**
+     * Find prescriptions for today for a specific doctor
+     */
+    public List<Prescription> findTodaysByDoctorId(Long doctorId) {
+        String sql = "SELECT * FROM Prescriptions WHERE doctor_id = ? AND prescription_date = CURDATE() ORDER BY created_at DESC";
+        
+        List<Prescription> prescriptions = new ArrayList<>();
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setLong(1, doctorId);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    prescriptions.add(mapResultSetToPrescription(rs));
+                }
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("Error finding today's prescriptions by doctor: " + e.getMessage());
         }
         
         return prescriptions;

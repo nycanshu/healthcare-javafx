@@ -254,6 +254,10 @@ public class ResidentService implements IResidentService {
         long currentBedId = rs.getLong("current_bed_id");
         resident.setCurrentBedId(currentBedId > 0 ? currentBedId : null);
         
+        // Map assigned_doctor_id field
+        long assignedDoctorId = rs.getLong("assigned_doctor_id");
+        resident.setAssignedDoctorId(assignedDoctorId > 0 ? assignedDoctorId : null);
+        
         resident.setMedicalCondition(rs.getString("medical_condition"));
         resident.setRequiresIsolation(rs.getBoolean("requires_isolation"));
         resident.setEmergencyContact(rs.getString("emergency_contact"));
