@@ -61,10 +61,7 @@ public class Room {
         Male, Female, Mixed
     }
     
-    // Constructors
-    public Room() {
-        // Default no-args constructor
-    }
+    // Custom constructors for business logic
     
     public Room(Long wardId, String roomNumber, RoomType roomType, int maxCapacity) {
         this.wardId = wardId;

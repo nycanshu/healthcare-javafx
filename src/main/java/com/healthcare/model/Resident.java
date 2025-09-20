@@ -76,10 +76,7 @@ public class Resident {
     @OneToMany(mappedBy = "resident", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Prescription> prescriptions = new ArrayList<>();
     
-    // Constructors
-    public Resident() {
-        // Default no-args constructor
-    }
+    // Custom constructors for business logic
     
     public Resident(String firstName, String lastName, Gender gender, LocalDate admissionDate) {
         this.firstName = firstName;

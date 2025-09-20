@@ -1,7 +1,13 @@
 package com.healthcare.controller;
 
 import com.healthcare.model.Staff;
-import com.healthcare.services.StaffService;
+import com.healthcare.model.Resident;
+import com.healthcare.services.ResidentService;
+import com.healthcare.services.MedicationAdministrationService;
+import com.healthcare.services.BedTransferService;
+import com.healthcare.controller.components.SimplifiedMedicationController;
+import com.healthcare.controller.components.BedTransferController;
+import com.healthcare.controller.components.NursePatientCareController;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
@@ -11,7 +17,7 @@ import java.util.List;
 
 /**
  * Controller for the Nurse Dashboard
- * Simple implementation with component-wise structure
+ * Enhanced implementation with nurse-specific functionality
  */
 public class NurseDashboardController extends BaseDashboardController {
     
@@ -35,6 +41,8 @@ public class NurseDashboardController extends BaseDashboardController {
     @FXML
     private Button medicationsButton;
     @FXML
+    private Button bedTransfersButton;
+    @FXML
     private Button reportsButton;
     
     // Content areas
@@ -47,16 +55,22 @@ public class NurseDashboardController extends BaseDashboardController {
     @FXML
     private VBox medicationsContent;
     @FXML
+    private VBox bedTransfersContent;
+    @FXML
     private VBox reportsContent;
     
     // Services
-    private StaffService staffService = new StaffService();
+    private ResidentService residentService = new ResidentService();
+    private MedicationAdministrationService medicationService = new MedicationAdministrationService();
+    private BedTransferService bedTransferService = new BedTransferService();
 
     @Override
     public void initialize(java.net.URL location, java.util.ResourceBundle resources) {
+        System.out.println("NurseDashboardController: Initializing...");
         super.initialize(location, resources);
         setupNavigation();
         loadDashboardData();
+        System.out.println("NurseDashboardController: Initialization complete");
     }
     
     private void setupNavigation() {
@@ -88,6 +102,14 @@ public class NurseDashboardController extends BaseDashboardController {
     }
     
     @FXML
+    private void showBedTransfers() {
+        setActiveButton(bedTransfersButton);
+        showContent(bedTransfersContent);
+        loadBedTransfersData();
+    }
+    
+    
+    @FXML
     private void showReports() {
         setActiveButton(reportsButton);
         showContent(reportsContent);
@@ -97,60 +119,189 @@ public class NurseDashboardController extends BaseDashboardController {
     // Data loading methods
     private void loadDashboardData() {
         try {
-            // Load statistics using simple services
-            long totalStaff = staffService.findAll().size();
+            if (currentStaff == null) {
+                System.out.println("Current staff not set, cannot load dashboard data");
+                return;
+            }
             
-            totalResidentsLabel.setText("0"); // TODO: Implement ResidentService
-            myPatientsLabel.setText("0"); // TODO: Implement Nurse-specific patient count
-            todaysTasksLabel.setText("0"); // TODO: Implement task service
-            pendingMedicationsLabel.setText("0"); // TODO: Implement medication service
+            // Load total residents count
+            List<Resident> allResidents = residentService.findActiveResidents();
+            totalResidentsLabel.setText(String.valueOf(allResidents.size()));
+            
+            // Load nurse's assigned patients count (nurses can care for all residents in their ward)
+            // For simplicity, we'll show residents who need medication administration
+            var residentsNeedingCare = allResidents.stream()
+                .filter(resident -> resident.getCurrentBedId() != null)
+                .count();
+            myPatientsLabel.setText(String.valueOf(residentsNeedingCare));
+            
+            // Load today's medication tasks
+            var medicationStats = medicationService.getMedicationStats();
+            todaysTasksLabel.setText(String.valueOf(medicationStats.getTotalScheduled()));
+            pendingMedicationsLabel.setText(String.valueOf(medicationStats.getPending()));
             
             // Load recent activity
             loadRecentActivity();
             
+            System.out.println("Dashboard data loaded successfully for Nurse " + currentStaff.getFullName());
+            System.out.println("Total patients: " + allResidents.size() + 
+                             ", Today's tasks: " + medicationStats.getTotalScheduled() + 
+                             ", Pending medications: " + medicationStats.getPending());
+            
         } catch (Exception e) {
+            System.err.println("Error loading dashboard data: " + e.getMessage());
+            e.printStackTrace();
             showError("Failed to load dashboard data: " + e.getMessage());
         }
     }
     
     private void loadRecentActivity() {
         recentActivityList.getItems().clear();
-        recentActivityList.getItems().addAll(
-            "System started successfully",
-            "Nurse logged in",
-            "Dashboard loaded"
-        );
+        
+        if (currentStaff != null) {
+            try {
+                // Load real activity based on nurse's recent actions
+                var recentTransfers = bedTransferService.getRecentTransfersByNurse(currentStaff.getStaffId(), 3);
+                var todaysAdministrations = medicationService.getTodaysAdministrations(currentStaff.getStaffId());
+                
+                // Add recent transfer activities
+                recentTransfers.stream()
+                    .limit(3)
+                    .forEach(transfer -> {
+                        String activity = "Transferred resident ID " + transfer.getResidentId() + 
+                                        " to bed " + transfer.getToBedId();
+                        recentActivityList.getItems().add(activity);
+                    });
+                
+                // Add recent medication activities
+                todaysAdministrations.stream()
+                    .limit(2)
+                    .forEach(admin -> {
+                        String activity = "Administered medication - " + admin.getStatus();
+                        recentActivityList.getItems().add(activity);
+                    });
+                
+                // Add login activity
+                recentActivityList.getItems().add("Nurse " + currentStaff.getFullName() + " logged in");
+                recentActivityList.getItems().add("Dashboard loaded successfully");
+                
+            } catch (Exception e) {
+                System.err.println("Error loading recent activity: " + e.getMessage());
+                // Fallback to default activities
+                recentActivityList.getItems().addAll(
+                    "Nurse " + currentStaff.getFullName() + " logged in",
+                    "Dashboard loaded",
+                    "System ready"
+                );
+            }
+        } else {
+            recentActivityList.getItems().addAll(
+                "System started successfully",
+                "Nurse logged in",
+                "Dashboard loaded"
+            );
+        }
     }
     
     private void loadPatientCareData() {
         try {
-            // TODO: Load patient care component
-            patientCareContent.getChildren().clear();
-            Label placeholder = new Label("Patient Care Management - Coming Soon");
-            placeholder.setStyle("-fx-font-size: 18px; -fx-text-fill: #666;");
-            patientCareContent.getChildren().add(placeholder);
+            if (currentStaff == null) {
+                System.out.println("Current staff not set yet, skipping Patient Care component loading");
+                return;
+            }
             
-            System.out.println("Patient care component loaded successfully");
+            // Clear existing content first
+            patientCareContent.getChildren().clear();
+            
+            // Load Patient Care component
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/components/nurse-patient-care.fxml"));
+            VBox patientCareComponent = loader.load();
+            
+            // Set current nurse in the component
+            NursePatientCareController controller = loader.getController();
+            controller.setCurrentNurse(currentStaff);
+            
+            patientCareContent.getChildren().add(patientCareComponent);
+            
+            System.out.println("Patient Care component loaded successfully for Nurse " + currentStaff.getFullName());
         } catch (Exception e) {
-            System.err.println("Error loading patient care component: " + e.getMessage());
+            System.err.println("Error loading Patient Care component: " + e.getMessage());
             e.printStackTrace();
+            
+            // Show error message in the content area
+            Label errorLabel = new Label("Error loading patient care data: " + e.getMessage());
+            errorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 14px;");
+            patientCareContent.getChildren().clear();
+            patientCareContent.getChildren().add(errorLabel);
         }
     }
     
     private void loadMedicationData() {
         try {
-            // TODO: Load medication component
-            medicationsContent.getChildren().clear();
-            Label placeholder = new Label("Medication Management - Coming Soon");
-            placeholder.setStyle("-fx-font-size: 18px; -fx-text-fill: #666;");
-            medicationsContent.getChildren().add(placeholder);
+            if (currentStaff == null) {
+                System.out.println("Current staff not set yet, skipping Medication Administration component loading");
+                return;
+            }
             
-            System.out.println("Medication component loaded successfully");
+            // Clear existing content first
+            medicationsContent.getChildren().clear();
+            
+            // Load Simplified Medication Administration component
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/components/simplified-medication-administration.fxml"));
+            VBox medicationComponent = loader.load();
+            
+            // Set current nurse in the component
+            SimplifiedMedicationController controller = loader.getController();
+            controller.setCurrentNurse(currentStaff);
+            
+            medicationsContent.getChildren().add(medicationComponent);
+            
+            System.out.println("Medication Administration component loaded successfully for Nurse " + currentStaff.getFullName());
         } catch (Exception e) {
-            System.err.println("Error loading medication component: " + e.getMessage());
+            System.err.println("Error loading Medication Administration component: " + e.getMessage());
             e.printStackTrace();
+            
+            // Show error message in the content area
+            Label errorLabel = new Label("Error loading medication data: " + e.getMessage());
+            errorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 14px;");
+            medicationsContent.getChildren().clear();
+            medicationsContent.getChildren().add(errorLabel);
         }
     }
+    
+    private void loadBedTransfersData() {
+        try {
+            if (currentStaff == null) {
+                System.out.println("Current staff not set yet, skipping Bed Transfers component loading");
+                return;
+            }
+            
+            // Clear existing content first
+            bedTransfersContent.getChildren().clear();
+            
+            // Load Bed Transfers component
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/components/bed-transfer.fxml"));
+            VBox bedTransferComponent = loader.load();
+            
+            // Set current nurse in the component
+            BedTransferController controller = loader.getController();
+            controller.setCurrentNurse(currentStaff);
+            
+            bedTransfersContent.getChildren().add(bedTransferComponent);
+            
+            System.out.println("Bed Transfers component loaded successfully for Nurse " + currentStaff.getFullName());
+        } catch (Exception e) {
+            System.err.println("Error loading Bed Transfers component: " + e.getMessage());
+            e.printStackTrace();
+            
+            // Show error message in the content area
+            Label errorLabel = new Label("Error loading bed transfer data: " + e.getMessage());
+            errorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 14px;");
+            bedTransfersContent.getChildren().clear();
+            bedTransfersContent.getChildren().add(errorLabel);
+        }
+    }
+    
     
     private void loadReportsData() {
         try {
@@ -179,7 +330,7 @@ public class NurseDashboardController extends BaseDashboardController {
         
         // Reset all buttons
         List<Button> buttons = List.of(
-            dashboardButton, patientCareButton, medicationsButton, reportsButton
+            dashboardButton, patientCareButton, medicationsButton, bedTransfersButton, reportsButton
         );
         
         for (Button button : buttons) {
@@ -210,7 +361,7 @@ public class NurseDashboardController extends BaseDashboardController {
     private void showContent(VBox content) {
         // Hide all content areas
         List<VBox> contentAreas = List.of(
-            dashboardContent, patientCareContent, medicationsContent, reportsContent
+            dashboardContent, patientCareContent, medicationsContent, bedTransfersContent, reportsContent
         );
         
         for (VBox area : contentAreas) {
@@ -229,5 +380,16 @@ public class NurseDashboardController extends BaseDashboardController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+    
+    @Override
+    public void setCurrentStaff(Staff currentStaff) {
+        System.out.println("NurseDashboardController: Setting current staff to: " + (currentStaff != null ? currentStaff.getUsername() : "null"));
+        super.setCurrentStaff(currentStaff);
+        
+        // Reload dashboard data when staff is set
+        if (currentStaff != null) {
+            loadDashboardData();
+        }
     }
 }

@@ -293,4 +293,58 @@ public class ResidentService implements IResidentService {
         
         return residents;
     }
+    
+    /**
+     * Get bed code for a resident by their current bed ID
+     */
+    public String getBedCodeForResident(Long residentId) {
+        String sql = "SELECT b.bed_code FROM Residents r " +
+                    "JOIN Beds b ON r.current_bed_id = b.bed_id " +
+                    "WHERE r.resident_id = ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setLong(1, residentId);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("bed_code");
+                }
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("Error getting bed code for resident: " + e.getMessage());
+        }
+        
+        return "N/A";
+    }
+    
+    /**
+     * Get bed code for a resident by their current bed ID (overloaded method)
+     */
+    public String getBedCodeForResident(Resident resident) {
+        if (resident.getCurrentBedId() == null || resident.getCurrentBedId() == 0) {
+            return "N/A";
+        }
+        
+        String sql = "SELECT bed_code FROM Beds WHERE bed_id = ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setLong(1, resident.getCurrentBedId());
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("bed_code");
+                }
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("Error getting bed code for resident: " + e.getMessage());
+        }
+        
+        return "N/A";
+    }
 }

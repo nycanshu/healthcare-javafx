@@ -33,10 +33,7 @@ public class Ward {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
     
-    // Constructors
-    public Ward() {
-        // Default no-args constructor
-    }
+    // Custom constructors for business logic
     
     public Ward(String wardName, String description) {
         this.wardName = wardName;

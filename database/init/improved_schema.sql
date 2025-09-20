@@ -186,6 +186,22 @@ CREATE TABLE Archive (
     FOREIGN KEY (resident_id) REFERENCES Residents(resident_id)
 );
 
+-- Bed Transfers Table (For nurse bed transfer functionality)
+CREATE TABLE Bed_Transfers (
+    transfer_id INT PRIMARY KEY AUTO_INCREMENT,
+    resident_id INT NOT NULL,
+    from_bed_id INT NULL,
+    to_bed_id INT NOT NULL,
+    nurse_id INT NOT NULL,
+    transfer_time DATETIME NOT NULL,
+    reason TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (resident_id) REFERENCES Residents(resident_id),
+    FOREIGN KEY (from_bed_id) REFERENCES Beds(bed_id),
+    FOREIGN KEY (to_bed_id) REFERENCES Beds(bed_id),
+    FOREIGN KEY (nurse_id) REFERENCES Staff(staff_id)
+);
+
 
 -- =====================================================
 -- ADDITIONAL FOREIGN KEY CONSTRAINTS

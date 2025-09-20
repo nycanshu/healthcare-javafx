@@ -55,6 +55,9 @@
             <Button fx:id="medicationsButton" text="💊 Medications" maxWidth="Infinity" onAction="#showMedications">
             </Button>
             
+            <Button fx:id="bedTransfersButton" text="🛏️ Bed Transfers" maxWidth="Infinity" onAction="#showBedTransfers">
+            </Button>
+            
             <Button fx:id="reportsButton" text="📈 Reports" maxWidth="Infinity" onAction="#showReports">
             </Button>
          </children>
@@ -209,27 +212,16 @@
                   
                   <!-- Patient Care Content -->
                   <VBox fx:id="patientCareContent" visible="false" managed="false" spacing="20">
-                     <children>
-                        <Label text="Patient Care" textFill="#2E86AB">
-                           <font>
-                              <Font name="System Bold" size="20.0" />
-                           </font>
-                        </Label>
-                        <Label text="Coming Soon - Patient care functionality will be implemented here." />
-                     </children>
                   </VBox>
                   
                   <!-- Medications Content -->
                   <VBox fx:id="medicationsContent" visible="false" managed="false" spacing="20">
-                     <children>
-                        <Label text="Medication Management" textFill="#2E86AB">
-                           <font>
-                              <Font name="System Bold" size="20.0" />
-                           </font>
-                        </Label>
-                        <Label text="Coming Soon - Medication management functionality will be implemented here." />
-                     </children>
                   </VBox>
+                  
+                  <!-- Bed Transfers Content -->
+                  <VBox fx:id="bedTransfersContent" visible="false" managed="false" spacing="20">
+                  </VBox>
+                  
                   
                   <!-- Reports Content -->
                   <VBox fx:id="reportsContent" visible="false" managed="false" spacing="20">

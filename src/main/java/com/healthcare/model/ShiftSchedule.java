@@ -63,10 +63,7 @@ public class ShiftSchedule {
         Scheduled, Completed, Cancelled
     }
     
-    // Constructors
-    public ShiftSchedule() {
-        this.createdAt = LocalDateTime.now();
-    }
+    // Custom constructors for business logic
     
     public ShiftSchedule(Long staffId, LocalDate shiftDate, Shift.ShiftType shiftType, String startTime, String endTime) {
         this.staffId = staffId;

@@ -59,7 +59,7 @@ public class AdministeredMedication {
         Given, Missed, Refused
     }
     
-    // Constructors
+    // Custom constructors for business logic
     public AdministeredMedication(Long prescriptionMedicineId, Long nurseId, LocalDateTime administeredTime) {
         this.prescriptionMedicineId = prescriptionMedicineId;
         this.nurseId = nurseId;

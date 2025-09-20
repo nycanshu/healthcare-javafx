@@ -55,10 +55,10 @@
             <Button fx:id="prescriptionsButton" text="💊 Prescriptions" maxWidth="Infinity" onAction="#showPrescriptions">
             </Button>
             
-            <Button fx:id="reportsButton" text="📈 Reports" maxWidth="Infinity" onAction="#showReports">
+            <Button fx:id="medicinesButton" text="💊 Medicines" maxWidth="Infinity" onAction="#showMedicines">
             </Button>
             
-            <Button fx:id="medicinesButton" text="💊 Medicines" maxWidth="Infinity" onAction="#showMedicines">
+            <Button fx:id="reportsButton" text="📈 Reports" maxWidth="Infinity" onAction="#showReports">
             </Button>
          </children>
       </VBox>

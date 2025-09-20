@@ -51,10 +51,7 @@ public class Shift {
         Morning, Afternoon, Doctor
     }
     
-    // Constructors
-    public Shift() {
-        // Default no-args constructor
-    }
+    // Custom constructors for business logic
     
     public Shift(String shiftName, ShiftType shiftType, LocalTime startTime, LocalTime endTime) {
         this.shiftName = shiftName;

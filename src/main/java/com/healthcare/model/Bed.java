@@ -64,10 +64,7 @@ public class Bed {
     @JoinColumn(name = "occupied_by", insertable = false, updatable = false)
     private Resident resident;
     
-    // Constructors
-    public Bed() {
-        // Default no-args constructor
-    }
+    // Custom constructors for business logic
     
     public Bed(Long roomId, String bedNumber, BedType bedType) {
         this.roomId = roomId;

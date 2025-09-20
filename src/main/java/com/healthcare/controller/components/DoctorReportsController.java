@@ -10,7 +10,11 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -27,10 +31,10 @@ public class DoctorReportsController implements Initializable {
     @FXML private Label totalPatientsLabel;
     @FXML private Label totalPrescriptionsLabel;
     @FXML private Label thisMonthLabel;
-    @FXML private ListView<String> reportsListView;
+    @FXML private ListView<String> recentActivityList;
     
     // Data
-    private ObservableList<String> reportsList = FXCollections.observableArrayList();
+    private ObservableList<String> activityList = FXCollections.observableArrayList();
     private Staff currentDoctor;
     
     // Services
@@ -54,14 +58,14 @@ public class DoctorReportsController implements Initializable {
     private void setupReports() {
         System.out.println("Setting up doctor reports component...");
         
-        // Initialize reports list
-        reportsList.add("📊 Patient Summary Report");
-        reportsList.add("💊 Prescription History Report");
-        reportsList.add("📅 Monthly Activity Report");
-        reportsList.add("👥 Patient Assignment Report");
-        reportsList.add("📈 Performance Metrics Report");
+        // Initialize activity list
+        activityList.add("📊 Patient Summary Report");
+        activityList.add("💊 Prescription History Report");
+        activityList.add("📅 Monthly Activity Report");
+        activityList.add("👥 Patient Assignment Report");
+        activityList.add("📈 Performance Metrics Report");
         
-        reportsListView.setItems(reportsList);
+        recentActivityList.setItems(activityList);
     }
     
     private void loadData() {
@@ -275,6 +279,96 @@ public class DoctorReportsController implements Initializable {
         showSuccess("Reports refreshed successfully");
     }
     
+    @FXML
+    private void exportPatientReport() {
+        try {
+            if (currentDoctor == null) {
+                showError("No doctor selected");
+                return;
+            }
+            
+            List<Resident> residents = residentService.findAll();
+            List<Resident> myPatients = residents.stream()
+                .filter(resident -> resident.getAssignedDoctorId() != null && 
+                       resident.getAssignedDoctorId().equals(currentDoctor.getStaffId()))
+                .collect(java.util.stream.Collectors.toList());
+            
+            String timestamp = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            String filename = "doctor_patient_report_" + timestamp + ".csv";
+            
+            String csvContent = generatePatientCSV(myPatients);
+            boolean exported = exportToCSV(filename, csvContent);
+            
+            if (exported) {
+                showSuccess("Patient report exported successfully!");
+            }
+        } catch (Exception e) {
+            System.err.println("Error exporting patient report: " + e.getMessage());
+            showError("Failed to export patient report: " + e.getMessage());
+        }
+    }
+    
+    @FXML
+    private void exportPrescriptionReport() {
+        try {
+            if (currentDoctor == null) {
+                showError("No doctor selected");
+                return;
+            }
+            
+            List<Prescription> prescriptions = prescriptionService.findAll();
+            List<Prescription> myPrescriptions = prescriptions.stream()
+                .filter(prescription -> prescription.getDoctorId().equals(currentDoctor.getStaffId()))
+                .collect(java.util.stream.Collectors.toList());
+            
+            String timestamp = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            String filename = "doctor_prescription_report_" + timestamp + ".csv";
+            
+            String csvContent = generatePrescriptionCSV(myPrescriptions);
+            boolean exported = exportToCSV(filename, csvContent);
+            
+            if (exported) {
+                showSuccess("Prescription report exported successfully!");
+            }
+        } catch (Exception e) {
+            System.err.println("Error exporting prescription report: " + e.getMessage());
+            showError("Failed to export prescription report: " + e.getMessage());
+        }
+    }
+    
+    @FXML
+    private void exportMonthlyReport() {
+        try {
+            if (currentDoctor == null) {
+                showError("No doctor selected");
+                return;
+            }
+            
+            LocalDate startOfMonth = LocalDate.now().withDayOfMonth(1);
+            LocalDate endOfMonth = LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth());
+            
+            List<Prescription> prescriptions = prescriptionService.findAll();
+            List<Prescription> monthlyPrescriptions = prescriptions.stream()
+                .filter(prescription -> prescription.getDoctorId().equals(currentDoctor.getStaffId()) &&
+                       prescription.getPrescriptionDate().isAfter(startOfMonth.minusDays(1)) &&
+                       prescription.getPrescriptionDate().isBefore(endOfMonth.plusDays(1)))
+                .collect(java.util.stream.Collectors.toList());
+            
+            String timestamp = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            String filename = "doctor_monthly_report_" + timestamp + ".csv";
+            
+            String csvContent = generateMonthlyCSV(monthlyPrescriptions);
+            boolean exported = exportToCSV(filename, csvContent);
+            
+            if (exported) {
+                showSuccess("Monthly report exported successfully!");
+            }
+        } catch (Exception e) {
+            System.err.println("Error exporting monthly report: " + e.getMessage());
+            showError("Failed to export monthly report: " + e.getMessage());
+        }
+    }
+    
     private void showReport(String title, String content) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
@@ -304,5 +398,101 @@ public class DoctorReportsController implements Initializable {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+    
+    private void showInfo(String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Information");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+    
+    // CSV Export Methods
+    private boolean exportToCSV(String fileName, String csvContent) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save Report");
+        fileChooser.setInitialFileName(fileName);
+        fileChooser.getExtensionFilters().add(
+            new FileChooser.ExtensionFilter("CSV Files", "*.csv")
+        );
+        
+        Stage stage = (Stage) totalPatientsLabel.getScene().getWindow();
+        File file = fileChooser.showSaveDialog(stage);
+        
+        if (file != null) {
+            try (FileWriter writer = new FileWriter(file)) {
+                writer.write(csvContent);
+                System.out.println("Report exported to: " + file.getAbsolutePath());
+                return true;
+            } catch (IOException e) {
+                System.err.println("Error writing file: " + e.getMessage());
+                throw new RuntimeException("Failed to write file", e);
+            }
+        }
+        return false; // User cancelled
+    }
+    
+    private String generatePatientCSV(List<Resident> patients) {
+        StringBuilder csv = new StringBuilder();
+        csv.append("Patient ID,Name,Gender,Age,Admission Date,Medical Condition,Assigned Doctor\n");
+        
+        for (Resident patient : patients) {
+            csv.append(patient.getResidentId()).append(",");
+            csv.append(escapeCSV(patient.getFirstName() + " " + patient.getLastName())).append(",");
+            csv.append(patient.getGender()).append(",");
+            csv.append(patient.getAge()).append(",");
+            csv.append(patient.getAdmissionDate()).append(",");
+            csv.append(escapeCSV(patient.getMedicalCondition() != null ? patient.getMedicalCondition() : "N/A")).append(",");
+            csv.append(escapeCSV(currentDoctor.getFullName())).append("\n");
+        }
+        
+        return csv.toString();
+    }
+    
+    private String generatePrescriptionCSV(List<Prescription> prescriptions) {
+        StringBuilder csv = new StringBuilder();
+        csv.append("Prescription ID,Patient Name,Date,Status,Review Status,Notes\n");
+        
+        for (Prescription prescription : prescriptions) {
+            // Get patient name from database
+            String patientName = prescriptionService.getPatientNameByResidentId(prescription.getResidentId());
+            
+            csv.append(prescription.getPrescriptionId()).append(",");
+            csv.append(escapeCSV(patientName)).append(",");
+            csv.append(prescription.getPrescriptionDate()).append(",");
+            csv.append(prescription.getStatus()).append(",");
+            csv.append(prescription.getReviewStatus()).append(",");
+            csv.append(escapeCSV(prescription.getNotes() != null ? prescription.getNotes() : "")).append("\n");
+        }
+        
+        return csv.toString();
+    }
+    
+    private String generateMonthlyCSV(List<Prescription> prescriptions) {
+        StringBuilder csv = new StringBuilder();
+        csv.append("Prescription ID,Patient Name,Date,Status,Review Status,Notes\n");
+        
+        for (Prescription prescription : prescriptions) {
+            // Get patient name from database
+            String patientName = prescriptionService.getPatientNameByResidentId(prescription.getResidentId());
+            
+            csv.append(prescription.getPrescriptionId()).append(",");
+            csv.append(escapeCSV(patientName)).append(",");
+            csv.append(prescription.getPrescriptionDate()).append(",");
+            csv.append(prescription.getStatus()).append(",");
+            csv.append(prescription.getReviewStatus()).append(",");
+            csv.append(escapeCSV(prescription.getNotes() != null ? prescription.getNotes() : "")).append("\n");
+        }
+        
+        return csv.toString();
+    }
+    
+    private String escapeCSV(String value) {
+        if (value == null) return "";
+        if (value.contains(",") || value.contains("\"") || value.contains("\n")) {
+            return "\"" + value.replace("\"", "\"\"") + "\"";
+        }
+        return value;
     }
 }

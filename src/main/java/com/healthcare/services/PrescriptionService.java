@@ -309,4 +309,94 @@ public class PrescriptionService {
         
         return prescription;
     }
+    
+    /**
+     * Get patient name for a prescription by querying the database
+     */
+    public String getPatientNameForPrescription(Long prescriptionId) {
+        String sql = "SELECT r.first_name, r.last_name FROM Prescriptions p " +
+                    "JOIN Residents r ON p.resident_id = r.resident_id " +
+                    "WHERE p.prescription_id = ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setLong(1, prescriptionId);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    String firstName = rs.getString("first_name");
+                    String lastName = rs.getString("last_name");
+                    return (firstName != null ? firstName : "") + " " + (lastName != null ? lastName : "");
+                }
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("Error getting patient name: " + e.getMessage());
+        }
+        
+        return "Unknown Patient";
+    }
+    
+    /**
+     * Get patient name for a prescription by resident ID
+     */
+    public String getPatientNameByResidentId(Long residentId) {
+        String sql = "SELECT first_name, last_name FROM Residents WHERE resident_id = ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setLong(1, residentId);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    String firstName = rs.getString("first_name");
+                    String lastName = rs.getString("last_name");
+                    return (firstName != null ? firstName : "") + " " + (lastName != null ? lastName : "");
+                }
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("Error getting patient name by resident ID: " + e.getMessage());
+        }
+        
+        return "Unknown Patient";
+    }
+    
+    /**
+     * Delete prescription by ID (alias for deleteById)
+     */
+    public boolean delete(Long prescriptionId) {
+        return deleteById(prescriptionId);
+    }
+    
+    /**
+     * Save a prescription medicine to the Prescription_Medicines table
+     */
+    public void savePrescriptionMedicine(Long prescriptionId, Long medicineId, String dosage, 
+                                       String frequency, java.time.LocalDate startDate, 
+                                       java.time.LocalDate endDate, String instructions) {
+        String sql = "INSERT INTO Prescription_Medicines (prescription_id, medicine_id, dosage, frequency, start_date, end_date, instructions, is_active, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setLong(1, prescriptionId);
+            stmt.setLong(2, medicineId);
+            stmt.setString(3, dosage);
+            stmt.setString(4, frequency);
+            stmt.setDate(5, startDate != null ? Date.valueOf(startDate) : null);
+            stmt.setDate(6, endDate != null ? Date.valueOf(endDate) : null);
+            stmt.setString(7, instructions);
+            stmt.setBoolean(8, true);
+            stmt.setTimestamp(9, Timestamp.valueOf(LocalDateTime.now()));
+            
+            stmt.executeUpdate();
+            
+        } catch (SQLException e) {
+            System.err.println("Error saving prescription medicine: " + e.getMessage());
+            throw new RuntimeException("Failed to save prescription medicine", e);
+        }
+    }
 }

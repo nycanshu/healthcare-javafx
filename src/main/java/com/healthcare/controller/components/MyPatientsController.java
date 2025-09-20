@@ -111,9 +111,9 @@ public class MyPatientsController implements Initializable {
         
         bedColumn.setCellValueFactory(cellData -> {
             Resident resident = cellData.getValue();
-            return new javafx.beans.property.SimpleStringProperty(
-                resident.getCurrentBed() != null ? resident.getCurrentBed().getBedCode() : "N/A"
-            );
+            // Get bed code from database using service
+            String bedCode = residentService.getBedCodeForResident(resident);
+            return new javafx.beans.property.SimpleStringProperty(bedCode);
         });
         
         statusColumn.setCellValueFactory(cellData -> {
@@ -123,23 +123,16 @@ public class MyPatientsController implements Initializable {
             );
         });
         
-        // Actions column with buttons
+        // Actions column with view button only
         actionsColumn.setCellFactory(column -> new TableCell<Resident, String>() {
-            private final Button viewButton = new Button("View");
-            private final Button prescribeButton = new Button("Prescribe");
+            private final Button viewButton = new Button("👁️ View Details");
             
             {
                 viewButton.setStyle("-fx-background-color: #28a745; -fx-text-fill: white; -fx-background-radius: 3; -fx-cursor: hand; -fx-padding: 5 10;");
-                prescribeButton.setStyle("-fx-background-color: #007bff; -fx-text-fill: white; -fx-background-radius: 3; -fx-cursor: hand; -fx-padding: 5 10;");
                 
                 viewButton.setOnAction(e -> {
                     Resident resident = getTableView().getItems().get(getIndex());
                     viewPatientDetails(resident);
-                });
-                
-                prescribeButton.setOnAction(e -> {
-                    Resident resident = getTableView().getItems().get(getIndex());
-                    createPrescription(resident);
                 });
             }
             
@@ -149,9 +142,7 @@ public class MyPatientsController implements Initializable {
                 if (empty) {
                     setGraphic(null);
                 } else {
-                    HBox buttonBox = new HBox(5);
-                    buttonBox.getChildren().addAll(viewButton, prescribeButton);
-                    setGraphic(buttonBox);
+                    setGraphic(viewButton);
                 }
             }
         });
@@ -335,7 +326,8 @@ public class MyPatientsController implements Initializable {
         details.append("Gender: ").append(patient.getGender()).append("\n");
         details.append("Admission Date: ").append(patient.getAdmissionDate()).append("\n");
         details.append("Medical Condition: ").append(patient.getMedicalCondition() != null ? patient.getMedicalCondition() : "N/A").append("\n");
-        details.append("Bed: ").append(patient.getCurrentBed() != null ? patient.getCurrentBed().getBedCode() : "N/A").append("\n");
+        String bedCode = residentService.getBedCodeForResident(patient);
+        details.append("Bed: ").append(bedCode).append("\n");
         details.append("Status: ").append(patient.isDischarged() ? "Discharged" : "Active").append("\n");
         details.append("Emergency Contact: ").append(patient.getEmergencyContact() != null ? patient.getEmergencyContact() : "N/A");
         
@@ -343,11 +335,4 @@ public class MyPatientsController implements Initializable {
         alert.showAndWait();
     }
     
-    private void createPrescription(Resident patient) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Create Prescription");
-        alert.setHeaderText("Prescription for " + patient.getFullName());
-        alert.setContentText("Prescription creation functionality will be implemented in the Prescription Management component.");
-        alert.showAndWait();
-    }
 }

@@ -83,10 +83,7 @@ public class Prescription {
         Pending, Reviewed, Approved, Rejected
     }
     
-    // Constructors
-    public Prescription() {
-        // Default no-args constructor
-    }
+    // Custom constructors for business logic
     
     public Prescription(Long residentId, Long doctorId, LocalDate prescriptionDate, String notes) {
         this.residentId = residentId;
@@ -147,4 +144,12 @@ public class Prescription {
     
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    
+    // Get patient name from resident relationship
+    public String getPatientName() {
+        if (resident != null) {
+            return resident.getFirstName() + " " + resident.getLastName();
+        }
+        return "Unknown Patient";
+    }
 }

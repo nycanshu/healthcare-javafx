@@ -125,16 +125,16 @@
             </HBox>
             
             <!-- Prescriptions Table -->
-            <TableView fx:id="prescriptionsTable" prefHeight="400" VBox.vgrow="ALWAYS"
+            <TableView fx:id="prescriptionsTable" prefHeight="350" VBox.vgrow="ALWAYS"
                        style="-fx-border-color: #dfe6e9; -fx-border-width: 1; 
                               -fx-background-radius: 8; -fx-border-radius: 8;">
                <columns>
-                  <TableColumn fx:id="patientNameColumn" text="Patient" />
-                  <TableColumn fx:id="prescriptionDateColumn" text="Date" />
-                  <TableColumn fx:id="medicinesColumn" text="Medicines" />
-                  <TableColumn fx:id="statusColumn" text="Status" />
-                  <TableColumn fx:id="reviewStatusColumn" text="Review Status" />
-                  <TableColumn fx:id="actionsColumn" text="Actions" />
+                  <TableColumn fx:id="patientNameColumn" text="Patient" prefWidth="150" />
+                  <TableColumn fx:id="prescriptionDateColumn" text="Date" prefWidth="120" />
+                  <TableColumn fx:id="medicinesColumn" text="Medicines" prefWidth="200" />
+                  <TableColumn fx:id="statusColumn" text="Status" prefWidth="100" />
+                  <TableColumn fx:id="reviewStatusColumn" text="Review Status" prefWidth="120" />
+                  <TableColumn fx:id="actionsColumn" text="Actions" prefWidth="200" />
                </columns>
             </TableView>
          </children>
@@ -199,9 +199,41 @@
                      </children>
                   </HBox>
                   
-                  <ListView fx:id="medicinesListView" prefHeight="120" 
-                            style="-fx-border-color: #DEE2E6; -fx-border-width: 1; 
-                                   -fx-border-radius: 6; -fx-background-radius: 6;" />
+                  <VBox spacing="10" 
+                        style="-fx-background-color: #F8F9FA; -fx-padding: 15; 
+                               -fx-border-color: #DEE2E6; -fx-border-width: 1; 
+                               -fx-border-radius: 8; -fx-background-radius: 8;">
+                     <children>
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                           <children>
+                              <Label text="📋 Added Medicines:" 
+                                     style="-fx-font-weight: bold; -fx-text-fill: #2E86AB; -fx-font-size: 14px;" />
+                              <Label fx:id="medicinesCountLabel" text="(0 medicines)" 
+                                     style="-fx-text-fill: #666; -fx-font-size: 12px;" />
+                           </children>
+                        </HBox>
+                        
+                        <ListView fx:id="medicinesListView" prefHeight="150" 
+                                  style="-fx-border-color: #DEE2E6; -fx-border-width: 1; 
+                                         -fx-border-radius: 6; -fx-background-radius: 6;
+                                         -fx-background-color: white; -fx-padding: 5;">
+                           <placeholder>
+                              <Label text="No medicines added yet. Select a medicine and click 'Add' to include it in the prescription." 
+                                     style="-fx-text-fill: #666; -fx-font-style: italic; -fx-padding: 20;" />
+                           </placeholder>
+                        </ListView>
+                        
+                        <HBox spacing="10" alignment="CENTER_RIGHT">
+                           <children>
+                              <Button fx:id="removeMedicineButton" text="🗑️ Remove Selected" 
+                                      style="-fx-background-color: #E74C3C; -fx-text-fill: white; 
+                                             -fx-background-radius: 6; -fx-padding: 8 16; 
+                                             -fx-font-weight: bold;" 
+                                      onAction="#removeSelectedMedicine" />
+                           </children>
+                        </HBox>
+                     </children>
+                  </VBox>
                </children>
             </VBox>
             

@@ -97,20 +97,13 @@ public class MedicineManagementController implements Initializable {
             );
         });
         
-        // Setup actions column
+        // Setup actions column - only view button since delete is not allowed due to foreign key constraints
         actionsColumn.setCellFactory(col -> new TableCell<Medicine, Void>() {
             private final Button viewButton = new Button("👁️ View");
-            private final Button editButton = new Button("✏️ Edit");
-            private final Button deleteButton = new Button("🗑️ Delete");
             
             {
                 viewButton.setStyle("-fx-background-color: #3498DB; -fx-text-fill: white; -fx-background-radius: 4; -fx-padding: 4 8;");
-                editButton.setStyle("-fx-background-color: #F18F01; -fx-text-fill: white; -fx-background-radius: 4; -fx-padding: 4 8;");
-                deleteButton.setStyle("-fx-background-color: #E74C3C; -fx-text-fill: white; -fx-background-radius: 4; -fx-padding: 4 8;");
-                
                 viewButton.setOnAction(e -> viewMedicine(getTableView().getItems().get(getIndex())));
-                editButton.setOnAction(e -> editMedicine(getTableView().getItems().get(getIndex())));
-                deleteButton.setOnAction(e -> deleteMedicine(getTableView().getItems().get(getIndex())));
             }
             
             @Override
@@ -119,7 +112,7 @@ public class MedicineManagementController implements Initializable {
                 if (empty) {
                     setGraphic(null);
                 } else {
-                    setGraphic(new javafx.scene.layout.HBox(5, viewButton, editButton, deleteButton));
+                    setGraphic(viewButton);
                 }
             }
         });
@@ -337,27 +330,8 @@ public class MedicineManagementController implements Initializable {
         alert.showAndWait();
     }
     
-    private void editMedicine(Medicine medicine) {
-        // TODO: Implement edit medicine functionality
-        showInfo("Edit medicine: " + medicine.getName());
-    }
-    
-    private void deleteMedicine(Medicine medicine) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Confirm Delete");
-        alert.setHeaderText("Delete Medicine");
-        alert.setContentText("Are you sure you want to delete this medicine?");
-        
-        if (alert.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
-            try {
-                medicineService.deleteById(medicine.getMedicineId());
-                showSuccess("Medicine deleted successfully");
-                loadData();
-            } catch (Exception e) {
-                showError("Failed to delete medicine: " + e.getMessage());
-            }
-        }
-    }
+    // Edit and delete medicine functionality removed as requested
+    // Delete is not allowed due to foreign key constraints with prescription medicines
     
     private void showSuccess(String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);

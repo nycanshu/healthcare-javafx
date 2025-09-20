@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.healthcare.controller.components.MedicationAdministrationController" spacing="20" style="-fx-padding: 20;">
+   <children>
+      <!-- Header -->
+      <Label text="💊 Medication Administration" textFill="#2E86AB" style="-fx-font-size: 20px; -fx-font-weight: bold;" />
+      
+      <!-- Statistics Cards -->
+      <GridPane hgap="20" vgap="20">
+         <columnConstraints>
+            <ColumnConstraints minWidth="150" />
+            <ColumnConstraints minWidth="150" />
+            <ColumnConstraints minWidth="150" />
+            <ColumnConstraints minWidth="150" />
+         </columnConstraints>
+         <rowConstraints>
+            <RowConstraints minHeight="100" />
+         </rowConstraints>
+         <children>
+            <!-- Total Scheduled Card -->
+            <VBox alignment="CENTER" spacing="10" style="-fx-background-color: #E8F4FD; -fx-padding: 15; -fx-border-color: #2E86AB; -fx-border-width: 1; -fx-border-radius: 5;" GridPane.columnIndex="0">
+               <children>
+                  <Label text="📋" style="-fx-font-size: 24px;" />
+                  <Label fx:id="totalScheduledLabel" text="0" textFill="#2E86AB" style="-fx-font-size: 20px; -fx-font-weight: bold;" />
+                  <Label text="Total Scheduled" textFill="#2E86AB" style="-fx-font-size: 12px;" />
+               </children>
+            </VBox>
+            
+            <!-- Administered Today Card -->
+            <VBox alignment="CENTER" spacing="10" style="-fx-background-color: #E8F5E8; -fx-padding: 15; -fx-border-color: #2ECC71; -fx-border-width: 1; -fx-border-radius: 5;" GridPane.columnIndex="1">
+               <children>
+                  <Label text="✅" style="-fx-font-size: 24px;" />
+                  <Label fx:id="administeredTodayLabel" text="0" textFill="#2ECC71" style="-fx-font-size: 20px; -fx-font-weight: bold;" />
+                  <Label text="Administered Today" textFill="#2ECC71" style="-fx-font-size: 12px;" />
+               </children>
+            </VBox>
+            
+            <!-- Pending Card -->
+            <VBox alignment="CENTER" spacing="10" style="-fx-background-color: #FDF2E8; -fx-padding: 15; -fx-border-color: #F18F01; -fx-border-width: 1; -fx-border-radius: 5;" GridPane.columnIndex="2">
+               <children>
+                  <Label text="⏳" style="-fx-font-size: 24px;" />
+                  <Label fx:id="pendingLabel" text="0" textFill="#F18F01">
+                  </Label>
+                  <Label text="Pending" textFill="#F18F01">
+                  </Label>
+               </children>
+            </VBox>
+            
+            <!-- Overdue Card -->
+            <VBox alignment="CENTER" spacing="10" style="-fx-background-color: #F3E8FD; -fx-padding: 15; -fx-border-color: #9B59B6; -fx-border-width: 1; -fx-border-radius: 5;" GridPane.columnIndex="3">
+               <children>
+                  <Label text="⚠️" style="-fx-font-size: 24px;" />
+                  <Label fx:id="overdueLabel" text="0" textFill="#9B59B6">
+                  </Label>
+                  <Label text="Overdue" textFill="#9B59B6">
+                  </Label>
+               </children>
+            </VBox>
+         </children>
+      </GridPane>
+      
+      <!-- Action Buttons -->
+      <HBox spacing="15" alignment="CENTER_LEFT">
+         <children>
+            <Button fx:id="refreshButton" text="🔄 Refresh" style="-fx-background-color: #3498DB; -fx-text-fill: white; -fx-background-radius: 5; -fx-padding: 8 15 8 15;">
+            </Button>
+            
+            <Button fx:id="markAdministeredButton" text="✅ Mark as Administered" style="-fx-background-color: #2ECC71; -fx-text-fill: white; -fx-background-radius: 5; -fx-padding: 8 15 8 15;" disable="true">
+            </Button>
+            
+            <Button fx:id="markMissedButton" text="❌ Mark as Missed" style="-fx-background-color: #E74C3C; -fx-text-fill: white; -fx-background-radius: 5; -fx-padding: 8 15 8 15;" disable="true">
+            </Button>
+            
+            <Button fx:id="markRefusedButton" text="🚫 Mark as Refused" style="-fx-background-color: #F39C12; -fx-text-fill: white; -fx-background-radius: 5; -fx-padding: 8 15 8 15;" disable="true">
+            </Button>
+         </children>
+      </HBox>
+      
+      <!-- Input Fields -->
+      <HBox spacing="20" alignment="CENTER_LEFT">
+         <children>
+            <Label text="Dosage Given:" textFill="#2E86AB" style="-fx-font-size: 12px; -fx-font-weight: bold;" />
+            <TextField fx:id="dosageGivenField" promptText="Enter dosage given" maxWidth="150">
+            </TextField>
+            
+            <Label text="Notes:" textFill="#2E86AB" style="-fx-font-size: 12px; -fx-font-weight: bold;" />
+            <TextArea fx:id="notesTextArea" promptText="Enter notes (optional)" maxWidth="300" maxHeight="80" wrapText="true">
+            </TextArea>
+         </children>
+      </HBox>
+      
+      <!-- Tabbed Content -->
+      <TabPane fx:id="medicationTabs" style="-fx-tab-min-width: 120;">
+         <tabs>
+            <Tab fx:id="scheduledTab" text="📋 Scheduled" closable="false">
+               <content>
+                  <VBox spacing="10">
+                     <children>
+                        <Label text="Today's Scheduled Medications" textFill="#2E86AB">
+                        </Label>
+                        
+                        <TableView fx:id="scheduledTable" style="-fx-background-color: #F8F9FA; -fx-border-color: #E0E0E0; -fx-border-width: 1; -fx-border-radius: 5;" maxHeight="300">
+                           <columns>
+                              <TableColumn fx:id="patientNameColumn" text="Patient" minWidth="120" />
+                              <TableColumn fx:id="medicineColumn" text="Medicine" minWidth="150" />
+                              <TableColumn fx:id="dosageColumn" text="Dosage" minWidth="100" />
+                              <TableColumn fx:id="frequencyColumn" text="Frequency" minWidth="120" />
+                              <TableColumn fx:id="bedColumn" text="Bed" minWidth="80" />
+                              <TableColumn fx:id="doctorColumn" text="Doctor" minWidth="120" />
+                           </columns>
+                        </TableView>
+                     </children>
+                  </VBox>
+               </content>
+            </Tab>
+            
+            <Tab fx:id="pendingTab" text="⏳ Pending" closable="false">
+               <content>
+                  <VBox spacing="10">
+                     <children>
+                        <Label text="Pending Medications (Not Yet Administered)" textFill="#2E86AB">
+                        </Label>
+                        
+                        <TableView fx:id="pendingTable" style="-fx-background-color: #F8F9FA; -fx-border-color: #E0E0E0; -fx-border-width: 1; -fx-border-radius: 5;" maxHeight="300">
+                           <columns>
+                              <TableColumn fx:id="pendingPatientColumn" text="Patient" minWidth="120" />
+                              <TableColumn fx:id="pendingMedicineColumn" text="Medicine" minWidth="150" />
+                              <TableColumn fx:id="pendingDosageColumn" text="Dosage" minWidth="100" />
+                              <TableColumn fx:id="pendingFrequencyColumn" text="Frequency" minWidth="120" />
+                              <TableColumn fx:id="pendingBedColumn" text="Bed" minWidth="80" />
+                              <TableColumn fx:id="pendingDoctorColumn" text="Doctor" minWidth="120" />
+                           </columns>
+                        </TableView>
+                     </children>
+                  </VBox>
+               </content>
+            </Tab>
+            
+            <Tab fx:id="administeredTab" text="✅ Administered" closable="false">
+               <content>
+                  <VBox spacing="10">
+                     <children>
+                        <Label text="Today's Administered Medications" textFill="#2E86AB">
+                        </Label>
+                        
+                        <TableView fx:id="administeredTable" style="-fx-background-color: #F8F9FA; -fx-border-color: #E0E0E0; -fx-border-width: 1; -fx-border-radius: 5;" maxHeight="300">
+                           <columns>
+                              <TableColumn fx:id="adminPatientColumn" text="Patient" minWidth="120" />
+                              <TableColumn fx:id="adminMedicineColumn" text="Medicine" minWidth="150" />
+                              <TableColumn fx:id="adminDosageColumn" text="Dosage" minWidth="100" />
+                              <TableColumn fx:id="adminTimeColumn" text="Time" minWidth="100" />
+                              <TableColumn fx:id="adminNurseColumn" text="Nurse" minWidth="120" />
+                           </columns>
+                        </TableView>
+                     </children>
+                  </VBox>
+               </content>
+            </Tab>
+            
+            <Tab fx:id="overdueTab" text="⚠️ Overdue" closable="false">
+               <content>
+                  <VBox spacing="10">
+                     <children>
+                        <Label text="Overdue Medications" textFill="#2E86AB">
+                        </Label>
+                        
+                        <Label text="Overdue medications will be displayed here when available." textFill="#666">
+                        </Label>
+                     </children>
+                  </VBox>
+               </content>
+            </Tab>
+         </tabs>
+      </TabPane>
+   </children>
+</VBox>

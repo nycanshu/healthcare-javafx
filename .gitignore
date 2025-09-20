@@ -1,0 +1,23 @@
+.target/
+.idea/
+.vscode/
+.DS_Store
+.mvn/
+.mvnw
+.mvnw.cmd
+.mvnw.bat
+.mvnw.sh
+.mvnw.sh.bat
+.mvnw.sh.cmd
+
+
+#class files are not needed
+*.class
+
+#ignore all files in the target directory
+target/
+
+#ignore all files in the .idea directory
+.idea/
+
+#ignore all files in the .vscode directory

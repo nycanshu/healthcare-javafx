@@ -63,11 +63,7 @@ public class Staff {
     @OneToMany(mappedBy = "staff", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ActionLog> actionLogs = new ArrayList<>();
     
-    // Constructors
-    public Staff() {
-        // Default no-args constructor
-    }
-    
+    // Custom constructors for business logic
     public Staff(String username, String password, Role role) {
         this.username = username;
         this.password = password;

@@ -50,10 +50,7 @@ public class Medicine {
     @OneToMany(mappedBy = "medicine", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<PrescriptionMedicine> prescriptionMedicines = new ArrayList<>();
     
-    // Constructors
-    public Medicine() {
-        // Default no-args constructor
-    }
+    // Custom constructors for business logic
     
     public Medicine(String name) {
         this.name = name;
