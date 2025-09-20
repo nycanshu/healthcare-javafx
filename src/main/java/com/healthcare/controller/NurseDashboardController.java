@@ -42,8 +42,6 @@ public class NurseDashboardController extends BaseDashboardController {
     private Button medicationsButton;
     @FXML
     private Button bedTransfersButton;
-    @FXML
-    private Button reportsButton;
     
     // Content areas
     @FXML
@@ -56,8 +54,6 @@ public class NurseDashboardController extends BaseDashboardController {
     private VBox medicationsContent;
     @FXML
     private VBox bedTransfersContent;
-    @FXML
-    private VBox reportsContent;
     
     // Services
     private ResidentService residentService = new ResidentService();
@@ -110,11 +106,6 @@ public class NurseDashboardController extends BaseDashboardController {
     
     
     @FXML
-    private void showReports() {
-        setActiveButton(reportsButton);
-        showContent(reportsContent);
-        loadReportsData();
-    }
     
     // Data loading methods
     private void loadDashboardData() {
@@ -303,20 +294,6 @@ public class NurseDashboardController extends BaseDashboardController {
     }
     
     
-    private void loadReportsData() {
-        try {
-            // TODO: Load reports component
-            reportsContent.getChildren().clear();
-            Label placeholder = new Label("Reports - Coming Soon");
-            placeholder.setStyle("-fx-font-size: 18px; -fx-text-fill: #666;");
-            reportsContent.getChildren().add(placeholder);
-            
-            System.out.println("Reports component loaded successfully");
-        } catch (Exception e) {
-            System.err.println("Error loading reports component: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
     
     // Helper methods
     private void setActiveButton(Button activeButton) {
@@ -330,7 +307,7 @@ public class NurseDashboardController extends BaseDashboardController {
         
         // Reset all buttons
         List<Button> buttons = List.of(
-            dashboardButton, patientCareButton, medicationsButton, bedTransfersButton, reportsButton
+            dashboardButton, patientCareButton, medicationsButton, bedTransfersButton
         );
         
         for (Button button : buttons) {
@@ -361,7 +338,7 @@ public class NurseDashboardController extends BaseDashboardController {
     private void showContent(VBox content) {
         // Hide all content areas
         List<VBox> contentAreas = List.of(
-            dashboardContent, patientCareContent, medicationsContent, bedTransfersContent, reportsContent
+            dashboardContent, patientCareContent, medicationsContent, bedTransfersContent
         );
         
         for (VBox area : contentAreas) {

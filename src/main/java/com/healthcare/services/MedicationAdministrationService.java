@@ -441,4 +441,82 @@ public class MedicationAdministrationService {
         public int getOverdue() { return overdue; }
         public void setOverdue(int overdue) { this.overdue = overdue; }
     }
+    
+    /**
+     * Find prescription medicine ID for a specific patient and medicine
+     */
+    public Long findPrescriptionMedicineId(Long residentId, Long medicineId) {
+        String sql = """
+            SELECT pm.id 
+            FROM Prescription_Medicines pm 
+            JOIN Prescriptions p ON pm.prescription_id = p.prescription_id 
+            WHERE p.resident_id = ? AND pm.medicine_id = ? AND pm.is_active = TRUE 
+            LIMIT 1
+            """;
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setLong(1, residentId);
+            stmt.setLong(2, medicineId);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getLong("id");
+                }
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("Error finding prescription medicine ID: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Get all medicines prescribed to a specific patient
+     */
+    public List<com.healthcare.model.Medicine> getMedicinesForPatient(Long residentId) {
+        String sql = """
+            SELECT DISTINCT m.medicine_id, m.name, m.description, m.dosage_unit, m.category, m.classification, m.is_active, m.created_at
+            FROM Medicines m
+            JOIN Prescription_Medicines pm ON m.medicine_id = pm.medicine_id
+            JOIN Prescriptions p ON pm.prescription_id = p.prescription_id
+            WHERE p.resident_id = ? 
+            AND pm.is_active = TRUE 
+            AND p.status = 'Active'
+            AND m.is_active = TRUE
+            ORDER BY m.name
+            """;
+        
+        List<com.healthcare.model.Medicine> medicines = new ArrayList<>();
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setLong(1, residentId);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    com.healthcare.model.Medicine medicine = new com.healthcare.model.Medicine();
+                    medicine.setMedicineId(rs.getLong("medicine_id"));
+                    medicine.setName(rs.getString("name"));
+                    medicine.setDescription(rs.getString("description"));
+                    medicine.setDosageUnit(rs.getString("dosage_unit"));
+                    medicine.setCategory(rs.getString("category"));
+                    medicine.setClassification(rs.getString("classification"));
+                    medicine.setActive(rs.getBoolean("is_active"));
+                    medicine.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+                    medicines.add(medicine);
+                }
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("Error getting medicines for patient: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        return medicines;
+    }
 }

@@ -58,8 +58,6 @@
             <Button fx:id="bedTransfersButton" text="🛏️ Bed Transfers" maxWidth="Infinity" onAction="#showBedTransfers">
             </Button>
             
-            <Button fx:id="reportsButton" text="📈 Reports" maxWidth="Infinity" onAction="#showReports">
-            </Button>
          </children>
       </VBox>
    </left>
@@ -184,11 +182,6 @@
                                        </font>
                                     </Button>
                                     
-                                    <Button text="📈 View Reports" style="-fx-background-color: #F18F01; -fx-text-fill: white; -fx-background-radius: 5; -fx-padding: 10;" onAction="#showReports">
-                                       <font>
-                                          <Font size="12.0" />
-                                       </font>
-                                    </Button>
                                  </children>
                               </HBox>
                            </children>
@@ -222,18 +215,6 @@
                   <VBox fx:id="bedTransfersContent" visible="false" managed="false" spacing="20">
                   </VBox>
                   
-                  
-                  <!-- Reports Content -->
-                  <VBox fx:id="reportsContent" visible="false" managed="false" spacing="20">
-                     <children>
-                        <Label text="Reports" textFill="#2E86AB">
-                           <font>
-                              <Font name="System Bold" size="20.0" />
-                           </font>
-                        </Label>
-                        <Label text="Coming Soon - Reports functionality will be implemented here." />
-                     </children>
-                  </VBox>
                </children>
             </VBox>
          </content>

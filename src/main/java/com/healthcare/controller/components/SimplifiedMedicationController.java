@@ -116,11 +116,21 @@ public class SimplifiedMedicationController implements Initializable {
             patientComboBox.setItems(patientsData);
             setupPatientComboBoxFormat();
             
-            // Load medicines with custom display format
+            // Set up patient selection handler to filter medicines
+            patientComboBox.setOnAction(e -> {
+                Resident selectedPatient = patientComboBox.getSelectionModel().getSelectedItem();
+                if (selectedPatient != null) {
+                    loadMedicinesForPatient(selectedPatient.getResidentId());
+                } else {
+                    // Clear medicine dropdown if no patient selected
+                    medicineComboBox.getItems().clear();
+                }
+            });
+            
+            // Load all medicines initially (will be filtered when patient is selected)
             List<Medicine> medicines = medicineService.findAll();
             medicinesData.clear();
             medicinesData.addAll(medicines);
-            medicineComboBox.setItems(medicinesData);
             setupMedicineComboBoxFormat();
             
             // Load today's medications (simplified)
@@ -188,13 +198,17 @@ public class SimplifiedMedicationController implements Initializable {
         
         try {
             // For now, we'll use a simplified approach since we need prescription_medicine_id
-            // In a real system, this would be more complex with prescription management
-            // For demonstration, we'll create a mock prescription medicine ID
-            Long mockPrescriptionMedicineId = 1L; // This would come from prescription system
+            // Find a valid prescription_medicine_id for this patient and medicine
+            Long prescriptionMedicineId = findPrescriptionMedicineId(selectedPatient.getResidentId(), selectedMedicine.getMedicineId());
+            
+            if (prescriptionMedicineId == null) {
+                showStatus("No prescription found for this patient and medicine", "error");
+                return;
+            }
             
             // Mark medication as administered using the service method
             boolean success = medicationService.markMedicationAsAdministered(
-                mockPrescriptionMedicineId,
+                prescriptionMedicineId,
                 currentNurse.getStaffId(),
                 dosage,
                 notes
@@ -321,6 +335,47 @@ public class SimplifiedMedicationController implements Initializable {
                 }
             }
         });
+    }
+    
+    private void loadMedicinesForPatient(Long residentId) {
+        try {
+            // Get medicines prescribed to this specific patient
+            List<Medicine> prescribedMedicines = medicationService.getMedicinesForPatient(residentId);
+            
+            // Clear and populate medicine dropdown with prescribed medicines only
+            medicineComboBox.getItems().clear();
+            medicineComboBox.getItems().addAll(prescribedMedicines);
+            
+            // Clear any previous selection
+            medicineComboBox.getSelectionModel().clearSelection();
+            
+            System.out.println("Loaded " + prescribedMedicines.size() + " prescribed medicines for patient ID: " + residentId);
+            
+        } catch (Exception e) {
+            System.err.println("Error loading medicines for patient: " + e.getMessage());
+            e.printStackTrace();
+            // Fallback to showing all medicines if there's an error
+            medicineComboBox.getItems().clear();
+            medicineComboBox.getItems().addAll(medicinesData);
+        }
+    }
+    
+    private Long findPrescriptionMedicineId(Long residentId, Long medicineId) {
+        try {
+            // Query to find a prescription_medicine_id for this patient and medicine
+            String sql = """
+                SELECT pm.id 
+                FROM Prescription_Medicines pm 
+                JOIN Prescriptions p ON pm.prescription_id = p.prescription_id 
+                WHERE p.resident_id = ? AND pm.medicine_id = ? AND pm.is_active = TRUE 
+                LIMIT 1
+                """;
+            
+            return medicationService.findPrescriptionMedicineId(residentId, medicineId);
+        } catch (Exception e) {
+            System.err.println("Error finding prescription medicine ID: " + e.getMessage());
+            return null;
+        }
     }
     
     public void setCurrentNurse(com.healthcare.model.Staff nurse) {

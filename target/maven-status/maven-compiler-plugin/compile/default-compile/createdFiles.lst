@@ -83,7 +83,6 @@ com/healthcare/controller/DoctorDashboardController.class
 com/healthcare/controller/LoginController.class
 com/healthcare/model/Prescription$ReviewStatus.class
 com/healthcare/controller/components/ShiftSchedulingController.class
-com/healthcare/controller/components/MedicationAdministrationController.class
 com/healthcare/model/Bed.class
 com/healthcare/util/TestDatabase.class
 com/healthcare/controller/components/MedicineManagementController.class
