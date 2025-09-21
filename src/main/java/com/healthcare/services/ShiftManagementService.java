@@ -4,6 +4,7 @@ import com.healthcare.config.DBConnection;
 import com.healthcare.model.Shift;
 import com.healthcare.model.ShiftSchedule;
 import com.healthcare.model.Staff;
+import com.healthcare.exceptions.ShiftComplianceException;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -267,7 +268,7 @@ public class ShiftManagementService {
     /**
      * Simple compliance check - throws exception if rules are violated
      */
-    public void checkCompliance(LocalDate weekStart) throws ComplianceException {
+    public void checkCompliance(LocalDate weekStart) throws ShiftComplianceException {
         LocalDate weekEnd = weekStart.plusDays(6);
         List<ShiftSchedule> weekShifts = findByDateRange(weekStart, weekEnd);
         
@@ -277,7 +278,7 @@ public class ShiftManagementService {
             .count();
         
         if (nurseShifts != 14) {
-            throw new ComplianceException("Nurse shifts must be exactly 14 per week (2 per day). Found: " + nurseShifts);
+            throw new ShiftComplianceException("Nurse shifts must be exactly 14 per week (2 per day). Found: " + nurseShifts);
         }
         
         // Check doctor shifts (should be 7 per week - 1 per day)
@@ -286,7 +287,7 @@ public class ShiftManagementService {
             .count();
         
         if (doctorShifts != 7) {
-            throw new ComplianceException("Doctor shifts must be exactly 7 per week (1 per day). Found: " + doctorShifts);
+            throw new ShiftComplianceException("Doctor shifts must be exactly 7 per week (1 per day). Found: " + doctorShifts);
         }
         
         // Check daily hours for each staff member
@@ -298,7 +299,7 @@ public class ShiftManagementService {
     /**
      * Check daily hours for a specific date
      */
-    private void checkDailyHours(LocalDate date, List<ShiftSchedule> allShifts) throws ComplianceException {
+    private void checkDailyHours(LocalDate date, List<ShiftSchedule> allShifts) {
         List<ShiftSchedule> dayShifts = allShifts.stream()
             .filter(s -> s.getShiftDate().equals(date))
             .toList();
@@ -313,8 +314,8 @@ public class ShiftManagementService {
                 
                 if (totalHours > 8) {
                     try {
-                        throw new ComplianceException("Staff member " + staffId + " has more than 8 hours on " + date);
-                    } catch (ComplianceException e) {
+                        throw new ShiftComplianceException("Staff member " + staffId + " has more than 8 hours on " + date);
+                    } catch (ShiftComplianceException e) {
                         throw new RuntimeException(e);
                     }
                 }

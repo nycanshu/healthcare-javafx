@@ -1,6 +1,6 @@
 package com.healthcare.services;
 
-import com.healthcare.config.DBConnection;
+import com.healthcare.config.TestDBConnection;
 import com.healthcare.model.Staff;
 import com.healthcare.services.impl.IStaffService;
 
@@ -10,15 +10,15 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Simple StaffService implementation using MySQL CRUD operations
+ * Test StaffService implementation using H2 test database
  */
-public class StaffService implements IStaffService {
+public class TestStaffService implements IStaffService {
 
     @Override
     public Staff save(Staff staff) {
         String sql = "INSERT INTO Staff (username, password, role, first_name, last_name, email, phone, is_active, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = TestDBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             
             stmt.setString(1, staff.getUsername());
@@ -55,7 +55,7 @@ public class StaffService implements IStaffService {
     public Optional<Staff> findById(Long id) {
         String sql = "SELECT * FROM Staff WHERE staff_id = ?";
         
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = TestDBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             stmt.setLong(1, id);
@@ -74,12 +74,13 @@ public class StaffService implements IStaffService {
 
     @Override
     public List<Staff> findAll() {
-        String sql = "SELECT * FROM Staff";
+        String sql = "SELECT * FROM Staff ORDER BY staff_id";
         List<Staff> staffList = new ArrayList<>();
         
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
+        try (Connection conn = TestDBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            ResultSet rs = stmt.executeQuery();
             
             while (rs.next()) {
                 staffList.add(mapResultSetToStaff(rs));
@@ -93,10 +94,40 @@ public class StaffService implements IStaffService {
     }
 
     @Override
+    public Staff update(Staff staff) {
+        String sql = "UPDATE Staff SET username = ?, password = ?, role = ?, first_name = ?, last_name = ?, email = ?, phone = ?, is_active = ?, updated_at = ? WHERE staff_id = ?";
+        
+        try (Connection conn = TestDBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, staff.getUsername());
+            stmt.setString(2, staff.getPassword());
+            stmt.setString(3, staff.getRole().toString());
+            stmt.setString(4, staff.getFirstName());
+            stmt.setString(5, staff.getLastName());
+            stmt.setString(6, staff.getEmail());
+            stmt.setString(7, staff.getPhone());
+            stmt.setBoolean(8, staff.isActive());
+            stmt.setTimestamp(9, Timestamp.valueOf(java.time.LocalDateTime.now()));
+            stmt.setLong(10, staff.getStaffId());
+            
+            int rowsAffected = stmt.executeUpdate();
+            if (rowsAffected > 0) {
+                return staff;
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("Error updating staff: " + e.getMessage());
+        }
+        
+        return null;
+    }
+
+    @Override
     public void deleteById(Long id) {
         String sql = "DELETE FROM Staff WHERE staff_id = ?";
         
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = TestDBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             stmt.setLong(1, id);
@@ -111,9 +142,7 @@ public class StaffService implements IStaffService {
     public Optional<Staff> authenticate(String username, String password) {
         String sql = "SELECT * FROM Staff WHERE username = ? AND password = ?";
         
-        System.out.println("StaffService: Authenticating user: " + username);
-        
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = TestDBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             stmt.setString(1, username);
@@ -121,46 +150,19 @@ public class StaffService implements IStaffService {
             ResultSet rs = stmt.executeQuery();
             
             if (rs.next()) {
-                Staff staff = mapResultSetToStaff(rs);
-                System.out.println("StaffService: Authentication successful for: " + staff.getUsername() + " with role: " + staff.getRole());
-                return Optional.of(staff);
-            } else {
-                System.out.println("StaffService: No matching user found for: " + username);
+                return Optional.of(mapResultSetToStaff(rs));
             }
             
         } catch (SQLException e) {
-            System.err.println("StaffService: Error authenticating staff: " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("Error authenticating staff: " + e.getMessage());
         }
         
         return Optional.empty();
     }
 
-
-    @Override
-    public Staff update(Staff staff) {
-        String sql = "UPDATE Staff SET username = ?, password = ?, role = ?, first_name = ?, last_name = ?, email = ?, phone = ?, is_active = ? WHERE staff_id = ?";
-        
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            stmt.setString(1, staff.getUsername());
-            stmt.setString(2, staff.getPassword());
-            stmt.setString(3, staff.getRole().toString());
-            stmt.setString(4, staff.getFirstName());
-            stmt.setString(5, staff.getLastName());
-            stmt.setString(6, staff.getEmail());
-            stmt.setString(7, staff.getPhone());
-            stmt.setBoolean(8, staff.isActive());
-            stmt.setLong(9, staff.getStaffId());
-            stmt.executeUpdate();
-            return staff;
-        } catch (SQLException e) {
-            System.err.println("Error updating staff: " + e.getMessage());
-            return null;
-        }
-    }
-    
+    /**
+     * Map ResultSet to Staff object
+     */
     private Staff mapResultSetToStaff(ResultSet rs) throws SQLException {
         Staff staff = new Staff();
         staff.setStaffId(rs.getLong("staff_id"));
@@ -174,10 +176,10 @@ public class StaffService implements IStaffService {
         staff.setActive(rs.getBoolean("is_active"));
         
         Timestamp createdAt = rs.getTimestamp("created_at");
-        staff.setCreatedAt(createdAt != null ? createdAt.toLocalDateTime() : null);
+        if (createdAt != null) {
+            staff.setCreatedAt(createdAt.toLocalDateTime());
+        }
         
         return staff;
     }
 }
-
-        

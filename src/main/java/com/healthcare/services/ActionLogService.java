@@ -220,6 +220,31 @@ public class ActionLogService {
     }
 
     /**
+     * Find recent action logs (for testing and dashboard)
+     */
+    public List<ActionLog> findRecentLogs(int limit) {
+        String sql = "SELECT * FROM Actions_Log ORDER BY action_time DESC LIMIT ?";
+        
+        List<ActionLog> actionLogs = new ArrayList<>();
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, limit);
+            ResultSet rs = stmt.executeQuery();
+            
+            while (rs.next()) {
+                actionLogs.add(mapResultSetToActionLogSimple(rs));
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("Error finding recent action logs: " + e.getMessage());
+        }
+        
+        return actionLogs;
+    }
+    
+    /**
      * Map ResultSet to ActionLog object
      */
     private ActionLog mapResultSetToActionLog(ResultSet rs) throws SQLException {

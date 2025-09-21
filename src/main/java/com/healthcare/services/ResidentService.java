@@ -32,8 +32,18 @@ public class ResidentService implements IResidentService {
             stmt.setString(8, resident.getMedicalCondition());
             stmt.setBoolean(9, resident.isRequiresIsolation());
             stmt.setString(10, resident.getEmergencyContact());
-            stmt.setTimestamp(11, Timestamp.valueOf(resident.getCreatedAt()));
-            stmt.setTimestamp(12, Timestamp.valueOf(resident.getUpdatedAt()));
+            // Handle null timestamps by using current timestamp
+            if (resident.getCreatedAt() != null) {
+                stmt.setTimestamp(11, Timestamp.valueOf(resident.getCreatedAt()));
+            } else {
+                stmt.setTimestamp(11, Timestamp.valueOf(java.time.LocalDateTime.now()));
+            }
+            
+            if (resident.getUpdatedAt() != null) {
+                stmt.setTimestamp(12, Timestamp.valueOf(resident.getUpdatedAt()));
+            } else {
+                stmt.setTimestamp(12, Timestamp.valueOf(java.time.LocalDateTime.now()));
+            }
             
             int rowsAffected = stmt.executeUpdate();
             if (rowsAffected > 0) {
